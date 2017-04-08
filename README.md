@@ -9,7 +9,7 @@ TODO document stuff.
 // Create your task during startup
 RemoteCall<Result, Argument> task = new RemoteCall<Result, Argument>() {
     @Override
-    public String run(Integer arg) {
+    public String run(Server server, Integer arg) {
         // This task runs on the target server
         if (some condition) {
             // Return a result
@@ -27,10 +27,15 @@ int serverGroup = 0; // Target all groups
 int serverId = 0; // Target all servers in that group
 Argument arg = <some argument>;
 
-task.$(serverGroup, serverId, arg, new RunnableVal2<Channel, String>() {
+task.call(serverGroup, serverId, arg, new RunnableVal2<Server, String>() {
     @Override
-    public void run(Channel channel, Result response) {
+    public void run(Server server, Result response) {
         // Do something with the result?
     }
 });
+
+// Other useful stuff
+ServerController controller = RedEdit.get().getServerController();
+PlayerListener playerListener = RedEdit.get().getPlayerListener();
+RedUtil util = RedEdit.get().getUtil();
 ```
