@@ -112,7 +112,7 @@ public class RedEdit {
     }
 
     private void setupCommands() {
-        CommandManager.getInstance().registerCommands(new TeleportCommands(util));
+        CommandManager.getInstance().registerCommands(new TeleportCommands(util, getServerController()));
     }
 
     private void setupEvents() {

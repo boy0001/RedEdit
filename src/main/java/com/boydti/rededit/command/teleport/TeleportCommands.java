@@ -3,7 +3,7 @@ package com.boydti.rededit.command.teleport;
 import com.boydti.fawe.config.BBC;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.RunnableVal2;
-import com.boydti.rededit.RedEdit;
+import com.boydti.rededit.listener.ServerController;
 import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.RedUtil;
@@ -16,9 +16,11 @@ import com.sk89q.worldedit.util.command.parametric.Optional;
 public class TeleportCommands {
 
     private final RedUtil util;
+    private final ServerController controller;
 
-    public TeleportCommands(RedUtil util) {
+    public TeleportCommands(RedUtil util, ServerController controller) {
         this.util = util;
+        this.controller = controller;
     }
 
     @Command(
@@ -47,7 +49,7 @@ public class TeleportCommands {
     )
     @CommandPermissions("rededit.tpa")
     public void tpa(Player player, String other) throws WorldEditException {
-        if (!RedEdit.get().getServerController().isOnline(other)) {
+        if (!controller.isOnline(other)) {
             player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
             return;
         }
@@ -85,7 +87,7 @@ public class TeleportCommands {
         if (request == null) {
             M.NO_REQUEST_FOUND.send(fp);
         } else {
-            if (!RedEdit.get().getServerController().isOnline(other)) {
+            if (!controller.isOnline(other)) {
                 player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
                 return;
             }
@@ -108,7 +110,7 @@ public class TeleportCommands {
     )
     @CommandPermissions("rededit.tp")
     public void tp(Player player, String other) throws WorldEditException {
-        if (!RedEdit.get().getServerController().isOnline(other)) {
+        if (!controller.isOnline(other)) {
             player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
             return;
         }
@@ -126,7 +128,7 @@ public class TeleportCommands {
     )
     @CommandPermissions("rededit.tphere")
     public void tphere(Player player, String other) throws WorldEditException {
-        if (!RedEdit.get().getServerController().isOnline(other)) {
+        if (!controller.isOnline(other)) {
             player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
             return;
         }
