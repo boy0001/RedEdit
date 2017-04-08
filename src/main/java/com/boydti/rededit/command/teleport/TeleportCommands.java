@@ -1,8 +1,10 @@
 package com.boydti.rededit.command.teleport;
 
+import com.boydti.fawe.config.BBC;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.RunnableVal2;
-import com.boydti.rededit.remote.Channel;
+import com.boydti.rededit.RedEdit;
+import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.RedUtil;
 import com.sk89q.minecraft.util.commands.Command;
@@ -21,6 +23,7 @@ public class TeleportCommands {
 
     @Command(
             aliases = { "/tptoggle" },
+            usage = "[player]",
             desc = "Toggle teleport requests",
             min = 0,
             max = 1
@@ -44,11 +47,15 @@ public class TeleportCommands {
     )
     @CommandPermissions("rededit.tpa")
     public void tpa(Player player, String other) throws WorldEditException {
+        if (!RedEdit.get().getServerController().isOnline(other)) {
+            player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
+            return;
+        }
         TeleportRequest request = new TeleportRequest(player.getName(), other, true, player.hasPermission("rededit.tp.override"));
         FawePlayer<Object> fp = FawePlayer.wrap(player);
-        util.tpa(request, new RunnableVal2<Channel, TPAResponse>() {
+        util.tpa(request, new RunnableVal2<Server, TPAResponse>() {
             @Override
-            public void run(Channel channel, TPAResponse response) {
+            public void run(Server server, TPAResponse response) {
                 switch (response) {
                     case ALLOW:
                         M.TPA_ALLOWED.send(fp, other);
@@ -78,6 +85,10 @@ public class TeleportCommands {
         if (request == null) {
             M.NO_REQUEST_FOUND.send(fp);
         } else {
+            if (!RedEdit.get().getServerController().isOnline(other)) {
+                player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
+                return;
+            }
             M.TPA_ACCEPTED.send(fp, request.sender);
             util.sendMessage(other, M.getPrefix() + M.TPA_ACCEPTED_SENDER.format(fp.getName()));
             if (request.to) {
@@ -97,7 +108,12 @@ public class TeleportCommands {
     )
     @CommandPermissions("rededit.tp")
     public void tp(Player player, String other) throws WorldEditException {
+        if (!RedEdit.get().getServerController().isOnline(other)) {
+            player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
+            return;
+        }
         FawePlayer<Object> fp = FawePlayer.wrap(player);
+        M.TELEPORTING.send(fp, other);
         util.teleport(fp, other);
     }
 
@@ -110,25 +126,47 @@ public class TeleportCommands {
     )
     @CommandPermissions("rededit.tphere")
     public void tphere(Player player, String other) throws WorldEditException {
-
+        if (!RedEdit.get().getServerController().isOnline(other)) {
+            player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
+            return;
+        }
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        M.TELEPORTING.send(fp, other);
+        util.teleport(other, fp);
     }
 
     @Command(
-            aliases = { "/tppos" },
-            usage = "[player]",
-            desc = "Accept a teleport request",
+            aliases = { "/back" },
+            desc = "Teleport to your previous location",
             min = 0,
-            max = 1
+            max = 0
     )
-    @CommandPermissions("rededit.tppos")
-    public void tppos(Player player, String other) throws WorldEditException {
-
+    @CommandPermissions("rededit.back")
+    public void back(Player player) throws WorldEditException {
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        if (!util.back(fp)) {
+            M.NO_BACK.send(fp);
+        } else {
+            M.TELEPORTING.send(fp);
+        }
     }
+
+//    @Command(
+//            aliases = { "/tppos" },
+//            usage = "[position]",
+//            desc = "Accept a teleport request",
+//            min = 0,
+//            max = 1
+//    )
+//    @CommandPermissions("rededit.tppos")
+//    public void tppos(Player player, String other) throws WorldEditException {
+//
+//    }
 
     @Command(
             aliases = { "/home" },
-            usage = "[player]",
-            desc = "Accept a teleport request",
+            usage = "[home]",
+            desc = "Teleport to your home",
             min = 0,
             max = 1
     )
@@ -139,9 +177,9 @@ public class TeleportCommands {
 
     @Command(
             aliases = { "/sethome" },
-            usage = "[player]",
-            desc = "Accept a teleport request",
-            min = 0,
+            usage = "[home]",
+            desc = "Set your home location",
+            min = 1,
             max = 1
     )
     @CommandPermissions("rededit.sethome")
@@ -151,8 +189,8 @@ public class TeleportCommands {
 
     @Command(
             aliases = { "/setwarp" },
-            usage = "[player]",
-            desc = "Accept a teleport request",
+            usage = "[warpname]",
+            desc = "Add a warp",
             min = 0,
             max = 1
     )
@@ -163,8 +201,8 @@ public class TeleportCommands {
 
     @Command(
             aliases = { "/warp" },
-            usage = "[player]",
-            desc = "Accept a teleport request",
+            usage = "[warp]",
+            desc = "Warp to a location",
             min = 0,
             max = 1
     )

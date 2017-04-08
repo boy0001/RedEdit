@@ -32,6 +32,9 @@ public enum M {
 
     NO_REQUEST_FOUND("&7No teleport request was found.", "Info"),
 
+    TELEPORTING("Teleporting to %s0", "Info"),
+    NO_BACK("No previous position", "Info"),
+
     ;
 
 
