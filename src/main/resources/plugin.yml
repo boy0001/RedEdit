@@ -1,0 +1,36 @@
+name: RedEdit
+main: com.boydti.rededit.RedEditBukkit
+version: ${version}
+description: RedEdit plugin
+authors: [Empire92]
+softdepend: [Vault, FastAsyncWorldEdit, WorldEdit]
+load: STARTUP
+database: false
+permissions:
+  rededit.tp.disabled:
+    description: Tptoggle perm
+    default: false
+commands:
+  tptoggle:
+    description: Toggle teleporting
+  tpa:
+    description: Request teleport to a player
+  tpahere:
+    description: Request a player teleports to you
+  tpaccept:
+    description: Accept a teleport request
+  tp:
+    description: Teleport to a player
+  tphere:
+    description: Teleport a player to you
+  tppos:
+    description: Teleport to a position
+  warp:
+    description: Warp to a place
+  home:
+    description: Teleport to your home
+  places:
+    description: List your places
+  visit:
+    description: Visit a place
+
