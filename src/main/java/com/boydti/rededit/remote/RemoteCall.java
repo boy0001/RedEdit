@@ -32,7 +32,7 @@ public abstract class RemoteCall<Result, Argument> {
     private final int id;
     private final RemoteCallException e;
 
-    LoadingCache<Integer, RunnableVal2<Channel, Result>> cache;
+    LoadingCache<Integer, RunnableVal2<Server, Result>> cache;
 
     public Serializer argumentSerializer;
     public Serializer resultSerializer;
@@ -213,25 +213,29 @@ public abstract class RemoteCall<Result, Argument> {
         return null;
     }
 
-    public abstract Result run(Argument arg);
+    public abstract Result run(Server sender, Argument arg);
 
-    public void result(Channel channel, int sequence, Result result) throws IOException {
-        RunnableVal2<Channel, Result> runnable = cache.getIfPresent(sequence);
+    public void result(Server sender, int sequence, Result result) throws IOException {
+        RunnableVal2<Server, Result> runnable = cache.getIfPresent(sequence);
         if (runnable != null) {
-            runnable.run(channel, result);
+            runnable.run(sender, result);
         }
     }
 
-    public void argument(Channel channel, int sequence, Argument arg) throws IOException {
-        Result result = run(arg);
+    public void argument(Server server, int sequence, Argument arg) throws IOException {
+        Result result = run(server, arg);
         RedEditPubSub scheduler = RedEdit.get().getScheduler();
         if (result != null) {
-            OutputStream os = scheduler.getOS(channel);
+            OutputStream os = scheduler.getOS(server.getChannel());
             write(os, result, Type.RESULT, sequence);
         }
     }
 
-    public void $(int withGroup, int withServerId, Argument arg, RunnableVal2<Channel, Result> onResult) {
+    public void call(int withGroup, int withServerId, Argument arg) {
+        call(withGroup, withServerId, arg, null);
+    }
+
+    public void call(int withGroup, int withServerId, Argument arg, RunnableVal2<Server, Result> onResult) {
         try {
             RedEditPubSub scheduler = RedEdit.get().getScheduler();
             OutputStream os = scheduler.getOS(Channel.getId(withGroup, withServerId));

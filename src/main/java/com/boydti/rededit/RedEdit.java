@@ -4,6 +4,7 @@ import com.boydti.rededit.command.teleport.TeleportCommands;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.listener.PlayerListener;
 import com.boydti.rededit.listener.RedEditPubSub;
+import com.boydti.rededit.listener.ServerController;
 import com.boydti.rededit.remote.Channel;
 import com.boydti.rededit.util.RedUtil;
 import com.sk89q.worldedit.extension.platform.CommandManager;
@@ -82,6 +83,10 @@ public class RedEdit {
         return LISTENER;
     }
 
+    public ServerController getServerController() {
+        return LISTENER;
+    }
+
     public void close() {
         if (LISTENER != null) {
             LISTENER.close();
@@ -112,7 +117,7 @@ public class RedEdit {
 
     private void setupEvents() {
         IMP.registerEvents();
-        this.playerListener = new PlayerListener();
+        this.playerListener = new PlayerListener(getServerController());
     }
 
     private void subscribe() {

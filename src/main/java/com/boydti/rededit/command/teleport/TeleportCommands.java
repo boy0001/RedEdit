@@ -97,7 +97,8 @@ public class TeleportCommands {
     )
     @CommandPermissions("rededit.tp")
     public void tp(Player player, String other) throws WorldEditException {
-
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        util.teleport(fp, other);
     }
 
     @Command(

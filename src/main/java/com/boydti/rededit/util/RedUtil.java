@@ -7,8 +7,8 @@ import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.command.teleport.TPAResponse;
 import com.boydti.rededit.command.teleport.TeleportRequest;
-import com.boydti.rededit.remote.Channel;
 import com.boydti.rededit.remote.RemoteCall;
+import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.serializer.BooleanSerializer;
 import com.boydti.rededit.serializer.EnumSerializer;
 import com.boydti.rededit.serializer.StringArraySerializer;
@@ -28,7 +28,7 @@ public class RedUtil {
     public RedUtil() {
         this.message = new RemoteCall<Boolean, String[]>() {
             @Override
-            public Boolean run(String[] arg) {
+            public Boolean run(Server sender, String[] arg) {
                 FawePlayer<Object> player = FawePlayer.wrap(arg[0]);
                 if (player != null) {
                     player.sendMessage(arg[1]);
@@ -39,7 +39,7 @@ public class RedUtil {
 
         addTeleportPlayerTask = new RemoteCall<Object, String[]>() {
             @Override
-            public Object run(String[] arg) {
+            public Object run(Server sender, String[] arg) {
                 FawePlayer<Object> fp = FawePlayer.wrap(arg[0]);
                 if (fp != null) {
                     RedEdit.get().getPlayerListener().addJoinTask(arg[1], new RunnableVal<FawePlayer>() {
@@ -56,7 +56,7 @@ public class RedUtil {
 
         this.tpa = new RemoteCall<TPAResponse, TeleportRequest>() {
             @Override
-            public TPAResponse run(TeleportRequest request) {
+            public TPAResponse run(Server sender, TeleportRequest request) {
                 FawePlayer player = FawePlayer.wrap(request.receiver);
                 if (player != null) {
                     if (request.override || player.hasPermission("rededit.tp.disabled")) {
@@ -78,8 +78,8 @@ public class RedUtil {
         }.setSerializer(new EnumSerializer<>(TPAResponse.values()), TeleportRequest.getSerializer());
     }
 
-    public void tpa(TeleportRequest request, RunnableVal2<Channel, TPAResponse> run) {
-        tpa.$(0, 0, request, run);
+    public void tpa(TeleportRequest request, RunnableVal2<Server, TPAResponse> run) {
+        tpa.call(0, 0, request, run);
     }
 
     public boolean addRequest(FawePlayer fp, TeleportRequest request) {
@@ -154,13 +154,13 @@ public class RedUtil {
 //        } else
         {
             String playerFromName = from.getName();
-            addTeleportPlayerTask.$(0, 0, new String[]{ playerFromName, playerTo }, new RunnableVal2<Channel, Object>() {
+            addTeleportPlayerTask.call(0, 0, new String[]{ playerFromName, playerTo }, new RunnableVal2<Server, Object>() {
                 @Override
-                public void run(Channel channel, Object o) {
+                public void run(Server server, Object o) {
                     TaskManager.IMP.sync(new RunnableVal<Object>() {
                         @Override
                         public void run(Object o) {
-                            RedEdit.imp().teleport(from, channel.getServer());
+                            RedEdit.imp().teleport(from, server.getId());
                         }
                     });
                 }
@@ -169,6 +169,6 @@ public class RedUtil {
     }
 
     public void sendMessage(String player, String message) {
-        this.message.$(0, 0, new String[]{player, message}, null);
+        this.message.call(0, 0, new String[]{player, message}, null);
     }
 }
