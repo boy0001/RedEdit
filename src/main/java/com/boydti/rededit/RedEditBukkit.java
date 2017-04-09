@@ -8,6 +8,8 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -81,13 +83,13 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
         List<String> tabs = event.getCompletions();
         String[] buffer = event.getBuffer().split(" ");
         String msg = buffer[buffer.length - 1].toLowerCase();
-        boolean added = false;
         if (msg.length() < 16 || msg.length() > 0) {
-            tabs.addAll(RedEdit.get().getNetwork().getPlayers(msg));
-            added = true;
-        }
-        if (added) {
-            event.setCompletions(tabs);
+            Collection<String> toAdd = RedEdit.get().getNetwork().getPlayers(msg);
+            if (toAdd.isEmpty()) {
+                ArrayList<String> both = new ArrayList<>(tabs);
+                both.addAll(tabs);
+                event.setCompletions(both);
+            }
         }
     }
 
