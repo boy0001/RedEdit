@@ -1,8 +1,10 @@
 package com.boydti.rededit.util;
 
+import com.boydti.fawe.object.FawePlayer;
 import com.intellectualcrafters.plot.PS;
 import com.intellectualcrafters.plot.object.Plot;
 import com.intellectualcrafters.plot.object.PlotId;
+import com.intellectualcrafters.plot.object.PlotPlayer;
 import com.intellectualcrafters.plot.object.worlds.PlotAreaManager;
 import com.intellectualcrafters.plot.object.worlds.SinglePlotArea;
 import com.intellectualcrafters.plot.object.worlds.SinglePlotAreaManager;
@@ -24,5 +26,9 @@ public class PlotLoader {
                 }
             }
         }
+    }
+
+    public void disableTeleport(FawePlayer fp) {
+        PlotPlayer.wrap(fp.getName()).setMeta("teleportOnLogin", false);
     }
 }

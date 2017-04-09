@@ -37,6 +37,7 @@ import redis.clients.jedis.JedisPool;
 
 public class RedEditPubSub extends BinaryJedisPubSub implements Network {
 
+    private final ScheduledExecutorService executorService;
     private JedisPool POOL;
     private final LoadingCache<Integer, Server> ALIVE_SERVERS;
     private final LoadingCache<Integer, Group> ALIVE_GROUPS;
@@ -89,7 +90,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
                 sendMessage(EVERYONE, ALIVE_MESSAGE);
             }
         };
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+        this.executorService = Executors.newScheduledThreadPool(1);
         executorService.scheduleAtFixedRate(new Runnable() {
             private final ExecutorService executor = Executors.newSingleThreadExecutor();
             private Future<?> lastExecution;
@@ -103,7 +104,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
         }, PING_INTERVAL_MS, PING_INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
 
-    public void start() {
+    private void start() {
         if (!started.getAndSet(true))  {
             sendMessage(EVERYONE, START_MESSAGE);
         }
@@ -161,6 +162,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
 
     @Override
     public void close() {
+        executorService.shutdownNow();
         sendMessage(EVERYONE, DEAD_MESSAGE);
         POOL = null;
     }

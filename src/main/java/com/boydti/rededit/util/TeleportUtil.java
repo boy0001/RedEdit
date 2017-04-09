@@ -53,13 +53,19 @@ public class TeleportUtil {
                     RedEdit.get().getPlayerListener().addJoinTask(pos.getPlayer(), new RunnableVal<FawePlayer>() {
                         @Override
                         public void run(FawePlayer fawePlayer) {
+                            if (loader != null) loader.disableTeleport(fawePlayer);
                             Player player = fawePlayer.getPlayer();
                             final Position back = new Position(pos.getPlayer(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId);
                             fawePlayer.setMeta("teleportBack", back);
-                            if (loader != null && pos.getWorld() != null) {
-                                loader.load(pos.getWorld());
-                            }
-                            player.findFreePosition(pos.getPosition(fawePlayer));
+                            TaskManager.IMP.sync(new RunnableVal<Object>() {
+                                @Override
+                                public void run(Object o) {
+                                    if (loader != null && pos.getWorld() != null) {
+                                        loader.load(pos.getWorld());
+                                    }
+                                    player.findFreePosition(pos.getPosition(fawePlayer));
+                                }
+                            });
                         }
                     });
                 }
@@ -76,6 +82,7 @@ public class TeleportUtil {
                     RedEdit.get().getPlayerListener().addJoinTask(arg[0], new RunnableVal<FawePlayer>() {
                         @Override
                         public void run(FawePlayer fawePlayer) {
+                            if (loader != null) loader.disableTeleport(fawePlayer);
                             Player player = fawePlayer.getPlayer();
                             final Position back = new Position(player.getName(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId);
                             fawePlayer.setMeta("teleportBack", back);
@@ -172,10 +179,15 @@ public class TeleportUtil {
         } else if (previous.getPosition() != null) {
             WorldVector pos = fp.getPlayer().getPosition();
             fp.setMeta("teleportBack", new Position(fp.getName(), Fawe.imp().getWorldName(pos.getWorld()), pos, Settings.IMP.SERVER_ID));
-            if (loader != null && previous.getWorld() != null) {
-                loader.load(previous.getWorld());
-            }
-            fp.getPlayer().findFreePosition(previous.getPosition(fp));
+            TaskManager.IMP.sync(new RunnableVal<Object>() {
+                @Override
+                public void run(Object o) {
+                    if (loader != null && previous.getWorld() != null) {
+                        loader.load(previous.getWorld());
+                    }
+                    fp.getPlayer().findFreePosition(previous.getPosition(fp));
+                }
+            });
             return true;
         }
         return false;
@@ -216,6 +228,7 @@ public class TeleportUtil {
             RedEdit.get().getPlayerListener().addJoinTask(from, new RunnableVal<FawePlayer>() {
                 @Override
                 public void run(FawePlayer fawePlayer) {
+                    if (loader != null) loader.disableTeleport(fawePlayer);
                     TaskManager.IMP.sync(new RunnableVal<Object>() {
                         @Override
                         public void run(Object o) {

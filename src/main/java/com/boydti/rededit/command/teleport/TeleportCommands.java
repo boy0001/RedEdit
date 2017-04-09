@@ -62,8 +62,40 @@ public class TeleportCommands {
             player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
             return;
         }
-        System.out.println("Player found " + controller.getServer(other));
         TeleportRequest request = new TeleportRequest(player.getName(), other, true, player.hasPermission("rededit.tp.override"));
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        util.tpa(request, new RunnableVal2<Server, TPAResponse>() {
+            @Override
+            public void run(Server server, TPAResponse response) {
+                switch (response) {
+                    case ALLOW:
+                        M.TPA_ALLOWED.send(fp, other);
+                        break;
+                    case DUPLICATE:
+                        M.TPA_DUPLICATE.send(fp, other);
+                        break;
+                    case DENY:
+                        M.TPA_DENIED.send(fp, other);
+                        break;
+                }
+            }
+        });
+    }
+
+    @Command(
+            aliases = { "/tpahere" },
+            usage = "<player>",
+            desc = "Send a teleport request to a player",
+            min = 1,
+            max = 1
+    )
+    @CommandPermissions("rededit.tpahere")
+    public void tpahere(Player player, String other) throws WorldEditException {
+        if (!controller.isOnline(other)) {
+            player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
+            return;
+        }
+        TeleportRequest request = new TeleportRequest(player.getName(), other, false, player.hasPermission("rededit.tp.override"));
         FawePlayer<Object> fp = FawePlayer.wrap(player);
         util.tpa(request, new RunnableVal2<Server, TPAResponse>() {
             @Override
@@ -328,7 +360,7 @@ public class TeleportCommands {
         WarpConf conf = RedEdit.get().getWarpConfig();
         WarpConf.WARP warp = conf.getWarp(name);
         if (warp == null) {
-            M.WARP_NOT_FOUND.send(fp, name);
+            M.WARP_NOT_FOUND.send(fp, StringMan.join(conf.WARP.getSections(), ", "));
         } else {
             Position pos = new Position(fp.getName(), warp.WORLD, new Vector(warp.X, warp.Y, warp.Z), warp.SERVER);
             M.TELEPORTING.send(fp, name);
