@@ -26,12 +26,14 @@ import java.util.concurrent.TimeUnit;
 
 public class RedUtil {
 
+    private final PlotLoader loader;
     private RemoteCall<Boolean, String[]> message;
     private RemoteCall<TPAResponse, TeleportRequest> tpa;
     private RemoteCall<Object, String[]> addTeleportPlayerTask;
     private RemoteCall<Object, Position> addTeleportPositionTask;
 
-    public RedUtil() {
+    public RedUtil(PlotLoader loader) {
+        this.loader = loader;
         this.message = new RemoteCall<Boolean, String[]>() {
             @Override
             public Boolean run(Server sender, String[] arg) {
@@ -54,6 +56,9 @@ public class RedUtil {
                             Player player = fawePlayer.getPlayer();
                             final Position back = new Position(pos.getPlayer(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId);
                             fawePlayer.setMeta("teleportBack", back);
+                            if (loader != null && pos.getWorld() != null) {
+                                loader.load(pos.getWorld());
+                            }
                             player.findFreePosition(pos.getPosition(fawePlayer));
                         }
                     });
@@ -167,6 +172,9 @@ public class RedUtil {
         } else if (previous.getPosition() != null) {
             WorldVector pos = fp.getPlayer().getPosition();
             fp.setMeta("teleportBack", new Position(fp.getName(), Fawe.imp().getWorldName(pos.getWorld()), pos, Settings.IMP.SERVER_ID));
+            if (loader != null && previous.getWorld() != null) {
+                loader.load(previous.getWorld());
+            }
             fp.getPlayer().findFreePosition(previous.getPosition(fp));
             return true;
         }

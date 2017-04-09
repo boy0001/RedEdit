@@ -177,7 +177,7 @@ public class TeleportCommands {
         if (!util.back(fp)) {
             M.NO_BACK.send(fp);
         } else {
-            M.TELEPORTING.send(fp);
+            M.TELEPORTING.send(fp, "BACK");
         }
     }
 

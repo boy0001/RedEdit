@@ -11,6 +11,7 @@ import com.boydti.rededit.listener.ServerController;
 import com.boydti.rededit.remote.Channel;
 import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.MapUtil;
+import com.boydti.rededit.util.PlotLoader;
 import com.boydti.rededit.util.RedUtil;
 import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.extension.platform.CommandManager;
@@ -64,7 +65,11 @@ public class RedEdit {
             POOL = new JedisPool(new JedisPoolConfig(), Settings.IMP.IP, Settings.IMP.PORT, 0, Settings.IMP.PASSWORD);
         }
         LISTENER = new RedEditPubSub(POOL);
-        this.util = new RedUtil();
+        PlotLoader loader = null;
+        try {
+            loader = new PlotLoader();
+        } catch (Throwable ignore) {}
+        this.util = new RedUtil(loader);
         // Subscribe
         // 0000 - Any + Any
         // GG00 - Group + Any
