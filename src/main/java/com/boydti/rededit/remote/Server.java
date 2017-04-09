@@ -9,12 +9,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Server extends Metadatable {
     private final Channel channel;
     private final ServerController reps;
+    private final String name;
     private ConcurrentHashMap<String, Object> players = new ConcurrentHashMap<>();
     private Object present = new Object();
 
-    public Server(Channel channel, ServerController reps) {
+    public Server(String name, Channel channel, ServerController reps) {
+        this.name = name;
         this.channel = channel;
         this.reps = reps;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Channel getChannel() {

@@ -3,13 +3,16 @@ package com.boydti.rededit.listener;
 import com.boydti.fawe.object.io.FastByteArrayInputStream;
 import com.boydti.fawe.object.io.FastByteArrayOutputStream;
 import com.boydti.fawe.util.TaskManager;
+import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.config.Settings;
+import com.boydti.rededit.events.ServerStartEvent;
 import com.boydti.rededit.remote.Channel;
 import com.boydti.rededit.remote.Group;
 import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.util.MapUtil;
 import com.google.common.cache.LoadingCache;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -20,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.jpountz.lz4.LZ4InputStream;
 import net.jpountz.lz4.LZ4OutputStream;
 import redis.clients.jedis.BinaryJedisPubSub;
@@ -32,6 +36,8 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
     private final LoadingCache<Integer, Server> ALIVE_SERVERS;
     private final LoadingCache<Integer, Group> ALIVE_GROUPS;
 
+    private ServerStartEvent serverStart;
+
     private final long GRACE_PERIOD_MS = 60000;
     private final long PING_INTERVAL_MS = 30000;
 
@@ -43,34 +49,35 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
     private final Channel SERVER_CHANNEL;
 
     private ConcurrentHashMap<Integer, RemoteCall> FUNCTIONS = new ConcurrentHashMap<>();
+    private AtomicBoolean started = new AtomicBoolean();
 
-    public RedEditPubSub(JedisPool pool) {
+    public RedEditPubSub(JedisPool pool) throws IOException {
         this.POOL = pool;
         this.ALIVE_SERVERS = MapUtil.getExpiringMap(GRACE_PERIOD_MS, TimeUnit.MILLISECONDS);
         this.ALIVE_GROUPS = MapUtil.getExpiringMap(GRACE_PERIOD_MS, TimeUnit.MILLISECONDS);
         SERVER_CHANNEL = new Channel(Settings.IMP.SERVER_GROUP, Settings.IMP.SERVER_ID);
-        START_MESSAGE = new byte[] {
-                SERVER_CHANNEL.getId()[0],
-                SERVER_CHANNEL.getId()[1],
-                SERVER_CHANNEL.getId()[2],
-                SERVER_CHANNEL.getId()[3],
-                (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0,
-        };
-        ALIVE_MESSAGE = new byte[] {
-                SERVER_CHANNEL.getId()[0],
-                SERVER_CHANNEL.getId()[1],
-                SERVER_CHANNEL.getId()[2],
-                SERVER_CHANNEL.getId()[3],
-                (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 1,
-        };
-        DEAD_MESSAGE = new byte[] {
-                SERVER_CHANNEL.getId()[0],
-                SERVER_CHANNEL.getId()[1],
-                SERVER_CHANNEL.getId()[2],
-                SERVER_CHANNEL.getId()[3],
-                (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 2,
-        };
-        sendMessage(EVERYONE, ALIVE_MESSAGE);
+        {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(baos);
+            dos.writeShort(SERVER_CHANNEL.getGroup());
+            dos.writeShort(SERVER_CHANNEL.getServer());
+            dos.writeInt(0);
+            dos.writeByte(0);
+            dos.writeUTF(RedEdit.imp().getServerName());
+            dos.close();
+            START_MESSAGE = baos.toByteArray();
+            ALIVE_MESSAGE = START_MESSAGE.clone();
+            ALIVE_MESSAGE[8] = 1;
+            DEAD_MESSAGE = START_MESSAGE.clone();
+            DEAD_MESSAGE[8] = 2;
+        }
+        serverStart = new ServerStartEvent();
+        TaskManager.IMP.task(new Runnable() {
+            @Override
+            public void run() {
+                start();
+            }
+        });
         TaskManager.IMP.repeatAsync(new Runnable() {
             @Override
             public void run() {
@@ -78,6 +85,12 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
                 sendMessage(EVERYONE, ALIVE_MESSAGE);
             }
         }, (int) (PING_INTERVAL_MS / 50));
+    }
+
+    public void start() {
+        if (!started.getAndSet(true))  {
+            sendMessage(EVERYONE, START_MESSAGE);
+        }
     }
 
     @Override
@@ -108,11 +121,12 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
     @Override
     public Collection<String> getPlayers(String startsWith) {
         Set<String> players = new LinkedHashSet<String>();
+        startsWith = startsWith.toLowerCase();
         for (Map.Entry<Integer, Server> entry : this.ALIVE_SERVERS.asMap().entrySet()) {
             Server server = entry.getValue();
             for (String player : server.getPlayers()) {
-                if (startsWith.isEmpty() || player.startsWith(startsWith)) {
-                    player.equals(player);
+                if (startsWith.isEmpty() || player.toLowerCase().startsWith(startsWith)) {
+                    players.add(player);
                 }
             }
         }
@@ -154,9 +168,12 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
                 int state = dataStream.read();
                 switch (state) {
                     case 0:
+                        if (server != Settings.IMP.SERVER_ID) {
+                            sendMessage(channel, ALIVE_MESSAGE);
+                        }
                         setDead(channel);
                     case 1:
-                        setAlive(channel);
+                        setAlive(channel, dataStream.readUTF());
                         break;
                     case 2:
                         setDead(channel);
@@ -175,7 +192,10 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
 
             Object value = packet.readObject(dataStream, type);
 
-            Server serverObj = getOrCreateServer(channel);
+            Server serverObj = getServer(channel.getServer());
+            if (serverObj == null) {
+                throw new UnsupportedOperationException("Server not found: " + channel);
+            }
 
             switch (type) {
                 case RESULT: {
@@ -237,15 +257,6 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
         });
     }
 
-    private Server getOrCreateServer(Channel channel) {
-        Server server = this.ALIVE_SERVERS.getIfPresent(channel.getServer());
-        if (server == null) {
-            server = new Server(channel, this);
-            this.ALIVE_SERVERS.put(channel.getServer(), server);
-        }
-        return server;
-    }
-
     private void sendMessage(Channel channel, byte[] message) {
         final FastByteArrayOutputStream fbaos = new FastByteArrayOutputStream();
         try {
@@ -264,6 +275,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
     }
 
     private void sendMessageRaw(byte[] id, byte[] message) {
+        start();
         Jedis jedis = POOL.getResource();
         try {
             jedis.publish(id, message);
@@ -274,7 +286,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
         }
     }
 
-    private void setAlive(Channel channel) {
+    private void setAlive(Channel channel, String name) {
         int groupId = channel.getGroup();
         int serverId = channel.getServer();
         Group existingGroup = this.ALIVE_GROUPS.getIfPresent(groupId);
@@ -283,10 +295,14 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
             existingGroup = new Group(groupId, this);
         }
         if (existingServer == null) {
-            existingServer = new Server(channel, this);
+            existingServer = new Server(name, channel, this);
+            this.ALIVE_SERVERS.put(serverId, existingServer);
+            this.ALIVE_GROUPS.put(groupId, existingGroup);
+            serverStart.call(existingServer);
+        } else {
+            this.ALIVE_SERVERS.put(serverId, existingServer);
+            this.ALIVE_GROUPS.put(groupId, existingGroup);
         }
-        this.ALIVE_SERVERS.put(serverId, existingServer);
-        this.ALIVE_GROUPS.put(groupId, existingGroup);
     }
 
     private void setDead(Channel channel) {

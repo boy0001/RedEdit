@@ -14,7 +14,7 @@ import com.boydti.rededit.util.RedUtil;
 import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.extension.platform.CommandManager;
 import java.io.File;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -48,13 +48,13 @@ public class RedEdit {
     private Jedis JEDIS;
     private PlayerListener playerListener;
 
-    public RedEdit(IRedEditPlugin imp) throws URISyntaxException, MalformedURLException {
+    public RedEdit(IRedEditPlugin imp) throws URISyntaxException, IOException {
         INSTANCE = this;
         IMP = imp;
         URL url = RedEdit.class.getProtectionDomain().getCodeSource().getLocation();
         FILE = new File(new URL(url.toURI().toString().split("\\!")[0].replaceAll("jar:file", "file")).toURI().getPath());
-        DIR = new File(FILE.getParentFile(), "PlotHTTP");
-        SETTINGS_FILE = new File("RedEdit/config.yml");
+        DIR = new File(FILE.getParentFile(), "RedEdit");
+        SETTINGS_FILE = new File(DIR, "config.yml");
         setupConfig();
         if (Settings.IMP.PASSWORD.isEmpty()) {
             POOL = new JedisPool(new JedisPoolConfig(), Settings.IMP.IP, Settings.IMP.PORT, 0);

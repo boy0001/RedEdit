@@ -28,11 +28,12 @@ public enum M {
     TPA_DUPLICATE("&7%s0 already has a request from you", "Info"),
     TPA_ALLOWED("&7%s0 has been sent your teleport request", "Info"),
     TPA_ACCEPTED("&7Accepted teleport request from %s0", "Info"),
+    TPA_REJECTED("&7Rejected teleport request from %s0", "Info"),
     TPA_ACCEPTED_SENDER("&7%s0 has accepted your teleport request", "Info"),
 
     NO_REQUEST_FOUND("&7No teleport request was found.", "Info"),
     SERVER_NOT_FOUND("&7Server not found: %s0", "Info"),
-    HOME_NOT_FOUND("&7Home not found: %s0", "Info"),
+    HOME_NOT_FOUND("&7Your homes: %s0", "Info"),
     WARP_NOT_FOUND("&7Warp not found: %s0", "Info"),
     HOME_DELETED("&7Removed home: %s0", "Info"),
     WARP_DELETED("&7Removed warp: %s0", "Info"),
@@ -219,7 +220,7 @@ public enum M {
     }
 
     public static String getPrefix() {
-        return (PREFIX.isEmpty() ? "" : PREFIX.s() + " ");
+        return (PREFIX.isEmpty() ? "" : color(PREFIX.s()) + " ");
     }
 
     public void send(Object actor, final Object... args) {

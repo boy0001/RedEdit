@@ -4,6 +4,7 @@ import com.boydti.fawe.Fawe;
 import com.boydti.fawe.config.BBC;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.RunnableVal2;
+import com.boydti.fawe.util.StringMan;
 import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.config.UserConf;
@@ -82,6 +83,24 @@ public class TeleportCommands {
     }
 
     @Command(
+            aliases = { "/tpdeny" },
+            usage = "[player]",
+            desc = "Reject a teleport request",
+            min = 0,
+            max = 1
+    )
+    @CommandPermissions("rededit.tpdeny")
+    public void tpdeny(Player player, @Optional("") String other) throws WorldEditException {
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        TeleportRequest request = util.removeRequest(fp, other);
+        if (request == null) {
+            M.NO_REQUEST_FOUND.send(fp);
+        } else {
+            M.TPA_REJECTED.send(fp, request.sender);
+        }
+    }
+
+    @Command(
             aliases = { "/tpaccept" },
             usage = "[player]",
             desc = "Accept a teleport request",
@@ -91,10 +110,11 @@ public class TeleportCommands {
     @CommandPermissions("rededit.tpaccept")
     public void tpaccept(Player player, @Optional("") String other) throws WorldEditException {
         FawePlayer<Object> fp = FawePlayer.wrap(player);
-        TeleportRequest request = util.getRequest(fp, other);
+        TeleportRequest request = util.removeRequest(fp, other);
         if (request == null) {
             M.NO_REQUEST_FOUND.send(fp);
         } else {
+            other = request.sender;
             if (!controller.isOnline(other)) {
                 player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
                 return;
@@ -186,7 +206,7 @@ public class TeleportCommands {
         UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
         UserConf.HOME home = conf.getHome(name);
         if (home == null) {
-            M.HOME_NOT_FOUND.send(fp, name);
+            M.HOME_NOT_FOUND.send(fp, StringMan.join(conf.getHomes(), ", "));
         } else {
             Position pos = new Position(fp.getName(), home.world, new Vector(home.x, home.y, home.z), home.server);
             M.TELEPORTING.send(fp, name);

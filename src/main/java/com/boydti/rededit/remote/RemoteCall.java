@@ -78,7 +78,7 @@ public abstract class RemoteCall<Result, Argument> {
     }
 
     public RemoteCall(int id, RunMode mode, int bufferSize, int timout) {
-        this.id = id == 0 ? getClass().hashCode() : id;
+        this.id = id == 0 ? getClass().getName().hashCode() : id;
         this.timout = timout;
         this.mode = mode;
         this.bufferSize = bufferSize;

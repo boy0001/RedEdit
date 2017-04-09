@@ -2,20 +2,19 @@ package com.boydti.rededit;
 
 import com.boydti.fawe.bukkit.BukkitPlayer;
 import com.boydti.fawe.object.FawePlayer;
-import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.events.PlayerJoinEvent;
 import com.boydti.rededit.events.PlayerQuitEvent;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collection;
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatTabCompleteEvent;
+import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listener {
@@ -31,7 +30,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
             this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         } catch (URISyntaxException e) {
             e.printStackTrace();
-        } catch (MalformedURLException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -42,14 +41,19 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     }
 
     @Override
-    public void teleport(FawePlayer fp, int server) {
-        if (server == Settings.IMP.SERVER_ID) {
+    public String getServerName() {
+        return Bukkit.getServerName();
+    }
+
+    @Override
+    public void teleport(FawePlayer fp, String server) {
+        if (server.equals(getServerName())) {
             return;
         }
         Player player = ((BukkitPlayer) fp).parent;
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Connect");
-        out.writeUTF(Integer.toString(server));
+        out.writeUTF(server);
         player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
     }
 
@@ -63,7 +67,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("ConnectOther");
         out.writeUTF(otherPlayer);
-        out.writeUTF(Integer.toString(Settings.IMP.SERVER_ID));
+        out.writeUTF(getServerName());
         player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
     }
 
@@ -73,11 +77,17 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     }
 
     @EventHandler
-    public void onTabComplete(PlayerChatTabCompleteEvent event) {
-        Collection<String> tabs = event.getTabCompletions();
-        String msg = event.getLastToken().toLowerCase();
+    public void onTabComplete(TabCompleteEvent event) {
+        List<String> tabs = event.getCompletions();
+        String[] buffer = event.getBuffer().split(" ");
+        String msg = buffer[buffer.length - 1].toLowerCase();
+        boolean added = false;
         if (msg.length() < 16 || msg.length() > 0) {
             tabs.addAll(RedEdit.get().getServerController().getPlayers(msg));
+            added = true;
+        }
+        if (added) {
+            event.setCompletions(tabs);
         }
     }
 

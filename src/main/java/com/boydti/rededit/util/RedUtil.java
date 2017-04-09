@@ -4,6 +4,7 @@ import com.boydti.fawe.Fawe;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.RunnableVal;
 import com.boydti.fawe.object.RunnableVal2;
+import com.boydti.fawe.util.StringMan;
 import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.command.teleport.TPAResponse;
@@ -14,11 +15,12 @@ import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.serializer.BooleanSerializer;
 import com.boydti.rededit.serializer.EnumSerializer;
+import com.boydti.rededit.serializer.PositionSerializer;
 import com.boydti.rededit.serializer.StringArraySerializer;
-import com.boydti.rededit.serializer.StringSerializer;
 import com.boydti.rededit.serializer.VoidSerializer;
 import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.entity.Player;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -59,15 +61,15 @@ public class RedUtil {
                 }
                 return null;
             }
-        }.setSerializer(new VoidSerializer(), new StringSerializer());
+        }.setSerializer(new VoidSerializer(), new PositionSerializer());
 
         addTeleportPlayerTask = new RemoteCall<Object, String[]>() {
             @Override
             public Object run(Server sender, String[] arg) {
                 int serverId = sender.getId();
-                FawePlayer<Object> fp = FawePlayer.wrap(arg[0]);
+                FawePlayer<Object> fp = FawePlayer.wrap(arg[1]);
                 if (fp != null) {
-                    RedEdit.get().getPlayerListener().addJoinTask(arg[1], new RunnableVal<FawePlayer>() {
+                    RedEdit.get().getPlayerListener().addJoinTask(arg[0], new RunnableVal<FawePlayer>() {
                         @Override
                         public void run(FawePlayer fawePlayer) {
                             Player player = fawePlayer.getPlayer();
@@ -80,7 +82,7 @@ public class RedUtil {
                 }
                 return null;
             }
-        }.setSerializer(new VoidSerializer(), new StringSerializer());
+        }.setSerializer(new VoidSerializer(), new StringArraySerializer());
 
         this.tpa = new RemoteCall<TPAResponse, TeleportRequest>() {
             @Override
@@ -158,9 +160,14 @@ public class RedUtil {
             return false;
         }
         if (previous.getServer() != null && previous.getServer() != Settings.IMP.SERVER_ID){
-            RedEdit.imp().teleport(fp, previous.getServer());
+            Server server = RedEdit.get().getServerController().getServer(previous.getServer());
+            if (server != null) {
+                RedEdit.imp().teleport(fp, server.getName());
+            }
             return true;
         } else if (previous.getPosition() != null) {
+            WorldVector pos = fp.getPlayer().getPosition();
+            fp.setMeta("teleportBack", new Position(fp.getName(), Fawe.imp().getWorldName(pos.getWorld()), pos, Settings.IMP.SERVER_ID));
             fp.getPlayer().findFreePosition(previous.getPosition(fp));
             return true;
         }
@@ -171,16 +178,17 @@ public class RedUtil {
         return teleport(from, pos.getServer(), pos.getWorld(), pos.getPosition());
     }
 
-    public boolean teleport(FawePlayer from, Integer server, String world, Vector pos) {
-        if (server == null || server == 0) {
-            server = Settings.IMP.SERVER_ID;
+    public boolean teleport(FawePlayer from, Integer serverId, String world, Vector pos) {
+        if (serverId == null || serverId == 0) {
+            serverId = Settings.IMP.SERVER_ID;
         }
-        if (RedEdit.get().getServerController().getServer(server) == null) {
+        Server server = RedEdit.get().getServerController().getServer(serverId);
+        if (server == null) {
             return false;
         }
-        Position remotePos = new Position(from.getName(), world, pos, server);
-        addTeleportPositionTask.call(0, server, remotePos, null);
-        RedEdit.imp().teleport(from, server);
+        Position remotePos = new Position(from.getName(), world, pos, serverId);
+        addTeleportPositionTask.call(0, serverId, remotePos, null);
+        RedEdit.imp().teleport(from, server.getName());
         return true;
     }
 
@@ -194,7 +202,8 @@ public class RedUtil {
             if (fpFrom != null) {
                 back = new Position(from, Fawe.imp().getWorldName(fpFrom.getWorld()), fpFrom.getPlayer().getPosition(), Settings.IMP.SERVER_ID);
             } else {
-                back = new Position(from, null, null, Settings.IMP.SERVER_ID);
+                Server server = RedEdit.get().getServerController().getServer(from);
+                back = new Position(from, null, null, server != null ? server.getId() : Settings.IMP.SERVER_ID);
             }
             RedEdit.imp().teleportHere(playerTo, from);
             RedEdit.get().getPlayerListener().addJoinTask(from, new RunnableVal<FawePlayer>() {
@@ -227,7 +236,7 @@ public class RedUtil {
                     TaskManager.IMP.sync(new RunnableVal<Object>() {
                         @Override
                         public void run(Object o) {
-                            RedEdit.imp().teleport(from, server.getId());
+                            RedEdit.imp().teleport(from, server.getName());
                         }
                     });
                 }
