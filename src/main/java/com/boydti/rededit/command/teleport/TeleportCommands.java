@@ -1,15 +1,23 @@
 package com.boydti.rededit.command.teleport;
 
+import com.boydti.fawe.Fawe;
 import com.boydti.fawe.config.BBC;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.RunnableVal2;
+import com.boydti.rededit.RedEdit;
+import com.boydti.rededit.config.Settings;
+import com.boydti.rededit.config.UserConf;
+import com.boydti.rededit.config.WarpConf;
 import com.boydti.rededit.listener.ServerController;
+import com.boydti.rededit.remote.Position;
 import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.RedUtil;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.util.command.parametric.Optional;
 
@@ -169,12 +177,63 @@ public class TeleportCommands {
             aliases = { "/home" },
             usage = "[home]",
             desc = "Teleport to your home",
-            min = 0,
+            min = 1,
             max = 1
     )
     @CommandPermissions("rededit.home")
-    public void home(Player player, String other) throws WorldEditException {
+    public void home(Player player, String name) throws WorldEditException {
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
+        UserConf.HOME home = conf.getHome(name);
+        if (home == null) {
+            M.HOME_NOT_FOUND.send(fp, name);
+        } else {
+            Position pos = new Position(fp.getName(), home.world, new Vector(home.x, home.y, home.z), home.server);
+            M.TELEPORTING.send(fp, name);
+            util.teleport(fp, pos);
+        }
+    }
 
+    @Command(
+            aliases = { "/delhome" },
+            usage = "[home]",
+            desc = "Delete your home",
+            min = 1,
+            max = 1
+    )
+    @CommandPermissions("rededit.delhome")
+    public void delhome(Player player, String name) throws WorldEditException {
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
+        UserConf.HOME home = conf.getHome(name);
+        if (home == null) {
+            M.HOME_NOT_FOUND.send(fp, name);
+        } else {
+            conf.deleteHome(name);
+            conf.save();
+            M.HOME_DELETED.send(fp, name);
+        }
+    }
+
+    @Command(
+            aliases = { "/delwarp" },
+            usage = "[warp]",
+            desc = "Delete a warp",
+            min = 1,
+            max = 1
+    )
+    @CommandPermissions("rededit.delwarp")
+    public void delwarp(Player player, String name) throws WorldEditException {
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        WarpConf warps = RedEdit.get().getWarpConfig();
+        WarpConf.WARP warp = warps.getWarp(name);
+        if (warp == null) {
+            M.WARP_NOT_FOUND.send(fp, name);
+        } else {
+            warps.deleteWarp(name);
+            warps.save();
+            M.WARP_DELETED.send(fp, name);
+        }
     }
 
     @Command(
@@ -185,31 +244,66 @@ public class TeleportCommands {
             max = 1
     )
     @CommandPermissions("rededit.sethome")
-    public void sethome(Player player, String other) throws WorldEditException {
-
+    public void sethome(Player player, String name) throws WorldEditException {
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
+        UserConf.HOME home = new UserConf.HOME();
+        WorldVector pos = player.getPosition();
+        home.world = Fawe.imp().getWorldName(pos.getWorld());
+        home.server = Settings.IMP.SERVER_ID;
+        home.x = pos.getBlockX();
+        home.y = pos.getBlockX();
+        home.z = pos.getBlockX();
+        conf.addHome(name, home);
+        conf.save();
+        M.HOME_SET.send(fp, name);
     }
 
     @Command(
             aliases = { "/setwarp" },
             usage = "[warpname]",
             desc = "Add a warp",
-            min = 0,
+            min = 1,
             max = 1
     )
     @CommandPermissions("rededit.setwarp")
-    public void setwarp(Player player, String other) throws WorldEditException {
-
+    public void setwarp(Player player, String name) throws WorldEditException {
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        WarpConf conf = RedEdit.get().getWarpConfig();
+        if (conf.getWarp(name) != null) {
+            M.WARP_ALREADY_SET.send(fp, name);
+            return;
+        }
+        WarpConf.WARP warp = new WarpConf.WARP();
+        WorldVector pos = player.getPosition();
+        warp.world = Fawe.imp().getWorldName(pos.getWorld());
+        warp.server = Settings.IMP.SERVER_ID;
+        warp.x = pos.getBlockX();
+        warp.y = pos.getBlockX();
+        warp.z = pos.getBlockX();
+        conf.addWarp(name, warp);
+        conf.save();
+        M.WARP_SET.send(fp, name);
     }
 
     @Command(
             aliases = { "/warp" },
             usage = "[warp]",
             desc = "Warp to a location",
-            min = 0,
+            min = 1,
             max = 1
     )
     @CommandPermissions("rededit.warp")
-    public void warp(Player player, String other) throws WorldEditException {
-
+    public void warp(Player player, String name) throws WorldEditException {
+        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        WarpConf conf = RedEdit.get().getWarpConfig();
+        WarpConf.WARP warp = conf.getWarp(name);
+        if (warp == null) {
+            M.WARP_NOT_FOUND.send(fp, name);
+        } else {
+            Position pos = new Position(fp.getName(), warp.world, new Vector(warp.x, warp.y, warp.z), warp.server);
+            M.TELEPORTING.send(fp, name);
+            util.teleport(fp, pos);
+        }
     }
 }

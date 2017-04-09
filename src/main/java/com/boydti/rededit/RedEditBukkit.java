@@ -9,11 +9,13 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listener {
@@ -68,6 +70,15 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     @Override
     public void registerEvents() {
         Bukkit.getPluginManager().registerEvents(this, this);
+    }
+
+    @EventHandler
+    public void onTabComplete(PlayerChatTabCompleteEvent event) {
+        Collection<String> tabs = event.getTabCompletions();
+        String msg = event.getLastToken().toLowerCase();
+        if (msg.length() < 16 || msg.length() > 0) {
+            tabs.addAll(RedEdit.get().getServerController().getPlayers(msg));
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

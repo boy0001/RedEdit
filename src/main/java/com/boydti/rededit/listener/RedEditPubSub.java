@@ -15,7 +15,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import net.jpountz.lz4.LZ4InputStream;
@@ -101,6 +103,20 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
     @Override
     public Channel getServerChannel() {
         return SERVER_CHANNEL;
+    }
+
+    @Override
+    public Collection<String> getPlayers(String startsWith) {
+        Set<String> players = new LinkedHashSet<String>();
+        for (Map.Entry<Integer, Server> entry : this.ALIVE_SERVERS.asMap().entrySet()) {
+            Server server = entry.getValue();
+            for (String player : server.getPlayers()) {
+                if (startsWith.isEmpty() || player.startsWith(startsWith)) {
+                    player.equals(player);
+                }
+            }
+        }
+        return players;
     }
 
     public Server getServer(String player) {

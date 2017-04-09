@@ -31,6 +31,15 @@ public enum M {
     TPA_ACCEPTED_SENDER("&7%s0 has accepted your teleport request", "Info"),
 
     NO_REQUEST_FOUND("&7No teleport request was found.", "Info"),
+    SERVER_NOT_FOUND("&7Server not found: %s0", "Info"),
+    HOME_NOT_FOUND("&7Home not found: %s0", "Info"),
+    WARP_NOT_FOUND("&7Warp not found: %s0", "Info"),
+    HOME_DELETED("&7Removed home: %s0", "Info"),
+    WARP_DELETED("&7Removed warp: %s0", "Info"),
+    HOME_SET("Created home %s0.", "Info"),
+    WARP_SET("Created warp %s0.", "Info"),
+    WARP_ALREADY_SET("There is already a warp called %s0.", "Info"),
+
 
     TELEPORTING("Teleporting to %s0", "Info"),
     NO_BACK("No previous position", "Info"),

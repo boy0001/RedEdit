@@ -24,5 +24,7 @@ public interface ServerController {
         return getServer(player) != null;
     }
 
+    Collection<String> getPlayers(String startsWith);
+
     Server getServer(String player);
 }

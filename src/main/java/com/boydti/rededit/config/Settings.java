@@ -19,4 +19,13 @@ public class Settings extends Config {
             " - Must be in the range: [–32768,32767]"
     })
     public int SERVER_ID = 1;
+
+    @Create
+    public PATHS PATHS;
+
+    @Comment("Paths for various directories")
+    public static final class PATHS {
+        public String USERS = "users";
+        public String WARPS = "warps";
+    }
 }

@@ -1,12 +1,17 @@
 package com.boydti.rededit;
 
+import com.boydti.fawe.util.MainUtil;
 import com.boydti.rededit.command.teleport.TeleportCommands;
 import com.boydti.rededit.config.Settings;
+import com.boydti.rededit.config.UserConf;
+import com.boydti.rededit.config.WarpConf;
 import com.boydti.rededit.listener.PlayerListener;
 import com.boydti.rededit.listener.RedEditPubSub;
 import com.boydti.rededit.listener.ServerController;
 import com.boydti.rededit.remote.Channel;
+import com.boydti.rededit.util.MapUtil;
 import com.boydti.rededit.util.RedUtil;
+import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.extension.platform.CommandManager;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -14,6 +19,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -33,6 +40,9 @@ public class RedEdit {
     private final File DIR;
     private final File FILE;
     private final RedUtil util;
+
+    private final WarpConf warps;
+    private final LoadingCache<UUID, UserConf> users;
 
     private List<Thread> RUNNING = new ArrayList<>();
     private Jedis JEDIS;
@@ -61,6 +71,22 @@ public class RedEdit {
         subscribe();
         setupEvents();
         setupCommands();
+
+        users = MapUtil.getExpiringMap(60, TimeUnit.SECONDS);
+        warps = new WarpConf(MainUtil.getFile(DIR, Settings.IMP.PATHS.WARPS + File.separator + "warps.yml"));
+    }
+
+    public WarpConf getWarpConfig() {
+        return warps;
+    }
+
+    public UserConf getUserConf(UUID user) {
+        UserConf conf = users.getIfPresent(user);
+        if (conf == null) {
+            conf = new UserConf(MainUtil.getFile(DIR, Settings.IMP.PATHS.USERS), user);
+            users.put(user, conf);
+        }
+        return conf;
     }
 
     public static RedEdit get() {
