@@ -42,6 +42,8 @@ public enum M {
     WARP_ALREADY_SET("There is already a warp called %s0.", "Info"),
 
 
+    NOT_ALPHANUMERIC("Must be alphanumeric: %s0", "Info"),
+
     TELEPORTING("Teleporting to %s0", "Info"),
     NO_BACK("No previous position", "Info"),
 

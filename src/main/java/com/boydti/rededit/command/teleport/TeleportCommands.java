@@ -37,16 +37,16 @@ public class TeleportCommands {
             usage = "[player]",
             desc = "Toggle teleport requests",
             min = 0,
-            max = 1
+            max = 0
     )
     @CommandPermissions("rededit.tptoggle")
-    public void tptoggle(Player player, String other) throws WorldEditException {
+    public void tptoggle(Player player) throws WorldEditException {
         FawePlayer<Object> fp = FawePlayer.wrap(player);
-        if (other != null) {
-            M.TOGGLE_TELEPORT_SPECIFIC.send(fp, other, fp.toggle("rededit.tp.disabled." + other));
-        } else {
+//        if (other != null) {
+//            M.TOGGLE_TELEPORT_SPECIFIC.send(fp, other, fp.toggle("rededit.tp.disabled." + other));
+//        } else {
             M.TOGGLE_TELEPORT.send(fp, fp.toggle("rededit.tp.disabled"));
-        }
+//        }
     }
 
     @Command(
@@ -62,6 +62,7 @@ public class TeleportCommands {
             player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
             return;
         }
+        System.out.println("Player found " + controller.getServer(other));
         TeleportRequest request = new TeleportRequest(player.getName(), other, true, player.hasPermission("rededit.tp.override"));
         FawePlayer<Object> fp = FawePlayer.wrap(player);
         util.tpa(request, new RunnableVal2<Server, TPAResponse>() {
@@ -266,6 +267,10 @@ public class TeleportCommands {
     @CommandPermissions("rededit.sethome")
     public void sethome(Player player, String name) throws WorldEditException {
         FawePlayer<Object> fp = FawePlayer.wrap(player);
+        if (!StringMan.isAlphanumericUnd(name)) {
+            M.NOT_ALPHANUMERIC.send(fp, name);
+            return;
+        }
         UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
         UserConf.HOME home = new UserConf.HOME();
         WorldVector pos = player.getPosition();
@@ -289,6 +294,10 @@ public class TeleportCommands {
     @CommandPermissions("rededit.setwarp")
     public void setwarp(Player player, String name) throws WorldEditException {
         FawePlayer<Object> fp = FawePlayer.wrap(player);
+        if (!StringMan.isAlphanumericUnd(name)) {
+            M.NOT_ALPHANUMERIC.send(fp, name);
+            return;
+        }
         WarpConf conf = RedEdit.get().getWarpConfig();
         if (conf.getWarp(name) != null) {
             M.WARP_ALREADY_SET.send(fp, name);

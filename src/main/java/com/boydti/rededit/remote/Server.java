@@ -10,8 +10,7 @@ public class Server extends Metadatable {
     private final Channel channel;
     private final ServerController reps;
     private String name;
-    private ConcurrentHashMap<String, Object> players = new ConcurrentHashMap<>();
-    private Object present = new Object();
+    private ConcurrentHashMap<String, String> players = new ConcurrentHashMap<>();
 
     public Server(String name, Channel channel, ServerController reps) {
         this.name = name;
@@ -44,19 +43,19 @@ public class Server extends Metadatable {
     }
 
     public Collection<String> getPlayers() {
-        return Collections.unmodifiableCollection(players.keySet());
+        return Collections.unmodifiableCollection(players.values());
     }
 
     public void addPlayer(String player) {
-        this.players.put(player, present);
+        this.players.put(player.toLowerCase(), player);
     }
 
     public void removePlayer(String player) {
-        this.players.remove(player);
+        this.players.remove(player.toLowerCase());
     }
 
     public boolean hasPlayer(String player) {
-        return player.contains(player);
+        return players.containsKey(player.toLowerCase());
     }
 
     public ServerController getServerController() {

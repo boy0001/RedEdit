@@ -8,6 +8,10 @@ import com.intellectualcrafters.plot.object.worlds.SinglePlotArea;
 import com.intellectualcrafters.plot.object.worlds.SinglePlotAreaManager;
 
 public class PlotLoader {
+    public PlotLoader() {
+        PS.get();
+    }
+
     public void load(String world) {
         PlotAreaManager manager = PS.get().getPlotAreaManager();
         if (manager instanceof SinglePlotAreaManager) {
