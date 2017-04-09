@@ -4,7 +4,6 @@ import com.boydti.fawe.Fawe;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.RunnableVal;
 import com.boydti.fawe.object.RunnableVal2;
-import com.boydti.fawe.util.StringMan;
 import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.command.teleport.TPAResponse;

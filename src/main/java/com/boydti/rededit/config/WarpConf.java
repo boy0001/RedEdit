@@ -14,11 +14,11 @@ public class WarpConf extends LocalConfig {
 
     @BlockName({}) // The name for the default block
     public static class WARP extends ConfigBlock {
-        public String world = "world";
-        public int server = 0;
-        public int x = 0;
-        public int y = 0;
-        public int z = 0;
+        public String WORLD = "world";
+        public int SERVER = 0;
+        public int X = 0;
+        public int Y = 0;
+        public int Z = 0;
     }
 
     public WARP deleteWarp(String warp) {

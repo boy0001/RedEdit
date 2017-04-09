@@ -1,5 +1,6 @@
 package com.boydti.rededit.listener;
 
+import com.boydti.fawe.Fawe;
 import com.boydti.fawe.object.io.FastByteArrayInputStream;
 import com.boydti.fawe.object.io.FastByteArrayOutputStream;
 import com.boydti.fawe.util.TaskManager;
@@ -192,9 +193,10 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
 
             Object value = packet.readObject(dataStream, type);
 
-            Server serverObj = getServer(channel.getServer());
+            Server serverObj = getOrCreateServer(channel);
             if (serverObj == null) {
-                throw new UnsupportedOperationException("Server not found: " + channel);
+                Fawe.debug("Server not found: " + channel);
+                start();
             }
 
             switch (type) {
@@ -300,9 +302,18 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
             this.ALIVE_GROUPS.put(groupId, existingGroup);
             serverStart.call(existingServer);
         } else {
+            existingServer.setName(name);
             this.ALIVE_SERVERS.put(serverId, existingServer);
             this.ALIVE_GROUPS.put(groupId, existingGroup);
         }
+    }
+
+    private Server getOrCreateServer(Channel channel) {
+        Server server = getServer(channel.getServer());
+        if (server == null) {
+            setAlive(channel, null);
+        }
+        return getServer(channel.getServer());
     }
 
     private void setDead(Channel channel) {

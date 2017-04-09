@@ -16,11 +16,11 @@ public class UserConf extends LocalConfig {
     @Comment({"The user's home locations"})
     @BlockName({}) // The name for the default block
     public static class HOME extends ConfigBlock {
-        public int server = 0;
-        public String world = "world";
-        public int x = 0;
-        public int y = 0;
-        public int z = 0;
+        public int SERVER = 0;
+        public String WORLD = "world";
+        public int X = 0;
+        public int Y = 0;
+        public int Z = 0;
     }
 
     public HOME getHome(String name) {

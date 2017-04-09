@@ -206,9 +206,9 @@ public class TeleportCommands {
         UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
         UserConf.HOME home = conf.getHome(name);
         if (home == null) {
-            M.HOME_NOT_FOUND.send(fp, StringMan.join(conf.getHomes(), ", "));
+            M.HOME_NOT_FOUND.send(fp, StringMan.join(conf.HOME.getSections(), ", "));
         } else {
-            Position pos = new Position(fp.getName(), home.world, new Vector(home.x, home.y, home.z), home.server);
+            Position pos = new Position(fp.getName(), home.WORLD, new Vector(home.X, home.Y, home.Z), home.SERVER);
             M.TELEPORTING.send(fp, name);
             util.teleport(fp, pos);
         }
@@ -248,7 +248,7 @@ public class TeleportCommands {
         WarpConf warps = RedEdit.get().getWarpConfig();
         WarpConf.WARP warp = warps.getWarp(name);
         if (warp == null) {
-            M.WARP_NOT_FOUND.send(fp, name);
+            M.WARP_NOT_FOUND.send(fp, StringMan.join(warps.WARP.getSections(), ", "));
         } else {
             warps.deleteWarp(name);
             warps.save();
@@ -269,11 +269,11 @@ public class TeleportCommands {
         UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
         UserConf.HOME home = new UserConf.HOME();
         WorldVector pos = player.getPosition();
-        home.world = Fawe.imp().getWorldName(pos.getWorld());
-        home.server = Settings.IMP.SERVER_ID;
-        home.x = pos.getBlockX();
-        home.y = pos.getBlockX();
-        home.z = pos.getBlockX();
+        home.WORLD = Fawe.imp().getWorldName(pos.getWorld());
+        home.SERVER = Settings.IMP.SERVER_ID;
+        home.X = pos.getBlockX();
+        home.Y = pos.getBlockY();
+        home.Z = pos.getBlockZ();
         conf.addHome(name, home);
         conf.save();
         M.HOME_SET.send(fp, name);
@@ -296,11 +296,11 @@ public class TeleportCommands {
         }
         WarpConf.WARP warp = new WarpConf.WARP();
         WorldVector pos = player.getPosition();
-        warp.world = Fawe.imp().getWorldName(pos.getWorld());
-        warp.server = Settings.IMP.SERVER_ID;
-        warp.x = pos.getBlockX();
-        warp.y = pos.getBlockX();
-        warp.z = pos.getBlockX();
+        warp.WORLD = Fawe.imp().getWorldName(pos.getWorld());
+        warp.SERVER = Settings.IMP.SERVER_ID;
+        warp.X = pos.getBlockX();
+        warp.Y = pos.getBlockY();
+        warp.Z = pos.getBlockZ();
         conf.addWarp(name, warp);
         conf.save();
         M.WARP_SET.send(fp, name);
@@ -321,7 +321,7 @@ public class TeleportCommands {
         if (warp == null) {
             M.WARP_NOT_FOUND.send(fp, name);
         } else {
-            Position pos = new Position(fp.getName(), warp.world, new Vector(warp.x, warp.y, warp.z), warp.server);
+            Position pos = new Position(fp.getName(), warp.WORLD, new Vector(warp.X, warp.Y, warp.Z), warp.SERVER);
             M.TELEPORTING.send(fp, name);
             util.teleport(fp, pos);
         }

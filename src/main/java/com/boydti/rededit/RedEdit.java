@@ -9,6 +9,7 @@ import com.boydti.rededit.listener.PlayerListener;
 import com.boydti.rededit.listener.RedEditPubSub;
 import com.boydti.rededit.listener.ServerController;
 import com.boydti.rededit.remote.Channel;
+import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.MapUtil;
 import com.boydti.rededit.util.RedUtil;
 import com.google.common.cache.LoadingCache;
@@ -55,6 +56,7 @@ public class RedEdit {
         FILE = new File(new URL(url.toURI().toString().split("\\!")[0].replaceAll("jar:file", "file")).toURI().getPath());
         DIR = new File(FILE.getParentFile(), "RedEdit");
         SETTINGS_FILE = new File(DIR, "config.yml");
+        M.load(new File(DIR, "messages.yml"));
         setupConfig();
         if (Settings.IMP.PASSWORD.isEmpty()) {
             POOL = new JedisPool(new JedisPoolConfig(), Settings.IMP.IP, Settings.IMP.PORT, 0);
