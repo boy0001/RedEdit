@@ -1,11 +1,12 @@
 package com.boydti.rededit.listener;
 
+import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.remote.Channel;
 import com.boydti.rededit.remote.Group;
 import com.boydti.rededit.remote.Server;
 import java.util.Collection;
 
-public interface ServerController {
+public interface Network {
     Server getServer(int serverId);
 
     Group getGroup(int groupId);
@@ -20,11 +21,19 @@ public interface ServerController {
 
     boolean isAlive(int groupId, int serverId);
 
+    Collection<String> getPlayers(String startsWith);
+
+    Server getServer(String player);
+
     default boolean isOnline(String player) {
         return getServer(player) != null;
     }
 
-    Collection<String> getPlayers(String startsWith);
+    default Server getLocalServer() {
+        return getServer(Settings.IMP.SERVER_ID);
+    }
 
-    Server getServer(String player);
+    default Group getLocalGroup() {
+        return getGroup(Settings.IMP.SERVER_GROUP);
+    }
 }

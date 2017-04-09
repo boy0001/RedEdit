@@ -1,18 +1,19 @@
 package com.boydti.rededit.remote;
 
 import com.boydti.fawe.object.Metadatable;
-import com.boydti.rededit.listener.ServerController;
+import com.boydti.rededit.config.Settings;
+import com.boydti.rededit.listener.Network;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Server extends Metadatable {
     private final Channel channel;
-    private final ServerController reps;
+    private final Network reps;
     private String name;
     private ConcurrentHashMap<String, String> players = new ConcurrentHashMap<>();
 
-    public Server(String name, Channel channel, ServerController reps) {
+    public Server(String name, Channel channel, Network reps) {
         this.name = name;
         this.channel = channel;
         this.reps = reps;
@@ -58,7 +59,11 @@ public class Server extends Metadatable {
         return players.containsKey(player.toLowerCase());
     }
 
-    public ServerController getServerController() {
+    public Network getServerController() {
         return reps;
+    }
+
+    public boolean isRemote() {
+        return getId() != Settings.IMP.SERVER_ID;
     }
 }

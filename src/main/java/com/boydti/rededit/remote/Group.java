@@ -1,14 +1,14 @@
 package com.boydti.rededit.remote;
 
-import com.boydti.rededit.listener.ServerController;
+import com.boydti.rededit.listener.Network;
 import java.util.Collection;
 import java.util.HashSet;
 
 public class Group {
     private final Channel channel;
-    private final ServerController reps;
+    private final Network reps;
 
-    public Group(int id, ServerController reps) {
+    public Group(int id, Network reps) {
         this.channel = new Channel(id, 0);
         this.reps = reps;
     }
@@ -32,7 +32,7 @@ public class Group {
         return channel;
     }
 
-    public ServerController getServerController() {
+    public Network getServerController() {
         return reps;
     }
 }

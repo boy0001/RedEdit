@@ -24,7 +24,7 @@ import com.sk89q.worldedit.entity.Player;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class RedUtil {
+public class TeleportUtil {
 
     private final PlotLoader loader;
     private RemoteCall<Boolean, String[]> message;
@@ -32,7 +32,7 @@ public class RedUtil {
     private RemoteCall<Object, String[]> addTeleportPlayerTask;
     private RemoteCall<Object, Position> addTeleportPositionTask;
 
-    public RedUtil(PlotLoader loader) {
+    public TeleportUtil(PlotLoader loader) {
         this.loader = loader;
         this.message = new RemoteCall<Boolean, String[]>() {
             @Override
@@ -164,7 +164,7 @@ public class RedUtil {
             return false;
         }
         if (previous.getServer() != null && previous.getServer() != Settings.IMP.SERVER_ID){
-            Server server = RedEdit.get().getServerController().getServer(previous.getServer());
+            Server server = RedEdit.get().getNetwork().getServer(previous.getServer());
             if (server != null) {
                 RedEdit.imp().teleport(fp, server.getName());
             }
@@ -189,7 +189,7 @@ public class RedUtil {
         if (serverId == null || serverId == 0) {
             serverId = Settings.IMP.SERVER_ID;
         }
-        Server server = RedEdit.get().getServerController().getServer(serverId);
+        Server server = RedEdit.get().getNetwork().getServer(serverId);
         if (server == null) {
             return false;
         }
@@ -209,7 +209,7 @@ public class RedUtil {
             if (fpFrom != null) {
                 back = new Position(from, Fawe.imp().getWorldName(fpFrom.getWorld()), fpFrom.getPlayer().getPosition(), Settings.IMP.SERVER_ID);
             } else {
-                Server server = RedEdit.get().getServerController().getServer(from);
+                Server server = RedEdit.get().getNetwork().getServer(from);
                 back = new Position(from, null, null, server != null ? server.getId() : Settings.IMP.SERVER_ID);
             }
             RedEdit.imp().teleportHere(playerTo, from);

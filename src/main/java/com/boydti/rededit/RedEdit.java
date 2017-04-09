@@ -7,12 +7,12 @@ import com.boydti.rededit.config.UserConf;
 import com.boydti.rededit.config.WarpConf;
 import com.boydti.rededit.listener.PlayerListener;
 import com.boydti.rededit.listener.RedEditPubSub;
-import com.boydti.rededit.listener.ServerController;
+import com.boydti.rededit.listener.Network;
 import com.boydti.rededit.remote.Channel;
 import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.MapUtil;
 import com.boydti.rededit.util.PlotLoader;
-import com.boydti.rededit.util.RedUtil;
+import com.boydti.rededit.util.TeleportUtil;
 import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.extension.platform.CommandManager;
 import java.io.File;
@@ -41,7 +41,7 @@ public class RedEdit {
     private final File SETTINGS_FILE;
     private final File DIR;
     private final File FILE;
-    private final RedUtil util;
+    private final TeleportUtil util;
 
     private final WarpConf warps;
     private final LoadingCache<UUID, UserConf> users;
@@ -69,7 +69,7 @@ public class RedEdit {
         try {
             loader = new PlotLoader();
         } catch (Throwable ignore) {}
-        this.util = new RedUtil(loader);
+        this.util = new TeleportUtil(loader);
         // Subscribe
         // 0000 - Any + Any
         // GG00 - Group + Any
@@ -104,7 +104,7 @@ public class RedEdit {
         return INSTANCE.IMP;
     }
 
-    public RedUtil getUtil() {
+    public TeleportUtil getTeleportUtil() {
         return util;
     }
 
@@ -116,7 +116,7 @@ public class RedEdit {
         return LISTENER;
     }
 
-    public ServerController getServerController() {
+    public Network getNetwork() {
         return LISTENER;
     }
 
@@ -145,12 +145,12 @@ public class RedEdit {
     }
 
     private void setupCommands() {
-        CommandManager.getInstance().registerCommands(new TeleportCommands(util, getServerController()));
+        CommandManager.getInstance().registerCommands(new TeleportCommands(util, getNetwork()));
     }
 
     private void setupEvents() {
         IMP.registerEvents();
-        this.playerListener = new PlayerListener(getServerController());
+        this.playerListener = new PlayerListener(getNetwork());
     }
 
     private void subscribe() {

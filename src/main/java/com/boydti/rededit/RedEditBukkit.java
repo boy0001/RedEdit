@@ -83,7 +83,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
         String msg = buffer[buffer.length - 1].toLowerCase();
         boolean added = false;
         if (msg.length() < 16 || msg.length() > 0) {
-            tabs.addAll(RedEdit.get().getServerController().getPlayers(msg));
+            tabs.addAll(RedEdit.get().getNetwork().getPlayers(msg));
             added = true;
         }
         if (added) {

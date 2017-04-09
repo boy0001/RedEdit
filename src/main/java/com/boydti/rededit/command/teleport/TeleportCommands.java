@@ -9,11 +9,11 @@ import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.config.UserConf;
 import com.boydti.rededit.config.WarpConf;
-import com.boydti.rededit.listener.ServerController;
+import com.boydti.rededit.listener.Network;
 import com.boydti.rededit.remote.Position;
 import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.util.M;
-import com.boydti.rededit.util.RedUtil;
+import com.boydti.rededit.util.TeleportUtil;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.worldedit.Vector;
@@ -24,10 +24,10 @@ import com.sk89q.worldedit.util.command.parametric.Optional;
 
 public class TeleportCommands {
 
-    private final RedUtil util;
-    private final ServerController controller;
+    private final TeleportUtil util;
+    private final Network controller;
 
-    public TeleportCommands(RedUtil util, ServerController controller) {
+    public TeleportCommands(TeleportUtil util, Network controller) {
         this.util = util;
         this.controller = controller;
     }

@@ -23,6 +23,10 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.jpountz.lz4.LZ4InputStream;
@@ -31,7 +35,7 @@ import redis.clients.jedis.BinaryJedisPubSub;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-public class RedEditPubSub extends BinaryJedisPubSub implements ServerController {
+public class RedEditPubSub extends BinaryJedisPubSub implements Network {
 
     private JedisPool POOL;
     private final LoadingCache<Integer, Server> ALIVE_SERVERS;
@@ -79,13 +83,24 @@ public class RedEditPubSub extends BinaryJedisPubSub implements ServerController
                 start();
             }
         });
-        TaskManager.IMP.repeatAsync(new Runnable() {
+        final Runnable task = new Runnable() {
             @Override
             public void run() {
-                // Remove dead groups / servers
                 sendMessage(EVERYONE, ALIVE_MESSAGE);
             }
-        }, (int) (PING_INTERVAL_MS / 50));
+        };
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+        executorService.scheduleAtFixedRate(new Runnable() {
+            private final ExecutorService executor = Executors.newSingleThreadExecutor();
+            private Future<?> lastExecution;
+            @Override
+            public void run() {
+                if (lastExecution != null && !lastExecution.isDone()) {
+                    return;
+                }
+                lastExecution = executor.submit(task);
+            }
+        }, PING_INTERVAL_MS, PING_INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
 
     public void start() {

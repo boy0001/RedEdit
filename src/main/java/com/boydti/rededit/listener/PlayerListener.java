@@ -29,9 +29,9 @@ public class PlayerListener {
     private final LoadingCache<String, List<RunnableVal<FawePlayer>>> joinTasks;
     private final RemoteCall<Object, String[]> joinPacket;
     private final RemoteCall<Object, String[]> quitPacket;
-    private final ServerController sub;
+    private final Network sub;
 
-    public PlayerListener(ServerController sub) {
+    public PlayerListener(Network sub) {
         this.sub = sub;
         WorldEdit.getInstance().getEventBus().register(this);
         this.joinTasks = MapUtil.getExpiringMap(10, TimeUnit.SECONDS);
@@ -72,7 +72,7 @@ public class PlayerListener {
     @Subscribe
     public void onServerStart(ServerStartEvent event) {
         Server server = event.getServer();
-        Server thisServer = RedEdit.get().getServerController().getServer(Settings.IMP.SERVER_ID);
+        Server thisServer = RedEdit.get().getNetwork().getServer(Settings.IMP.SERVER_ID);
         if (thisServer != null) {
             Collection<String> players = thisServer.getPlayers();
             joinPacket.call(0, server.getId(), players.toArray(new String[players.size()]));
