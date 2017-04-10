@@ -49,7 +49,6 @@ Temporary Items
 
 # Other
 *.bat
-lib/
 gradle/
 build/
 .idea
