@@ -43,7 +43,7 @@ public class RedEdit {
     private final File FILE;
     private final TeleportUtil util;
 
-    private final WarpConf warps;
+    private volatile WarpConf warps;
     private final LoadingCache<UUID, UserConf> users;
 
     private List<Thread> RUNNING = new ArrayList<>();
@@ -78,13 +78,20 @@ public class RedEdit {
         subscribe();
         setupEvents();
         setupCommands();
-
         users = MapUtil.getExpiringMap(60, TimeUnit.SECONDS);
-        warps = new WarpConf(MainUtil.getFile(DIR, Settings.IMP.PATHS.WARPS + File.separator + "warps.yml"));
     }
 
     public WarpConf getWarpConfig() {
-        return warps;
+        WarpConf tmp = warps;
+        if (tmp == null) {
+            warps = tmp = new WarpConf(MainUtil.getFile(DIR, Settings.IMP.PATHS.WARPS + File.separator + "warps.yml"));
+            tmp.load();
+        }
+        return tmp;
+    }
+
+    public void unloadWarps() {
+        warps = null;
     }
 
     public UserConf getUserConf(UUID user) {

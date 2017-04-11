@@ -11,7 +11,9 @@ import com.boydti.rededit.config.UserConf;
 import com.boydti.rededit.config.WarpConf;
 import com.boydti.rededit.listener.Network;
 import com.boydti.rededit.remote.Position;
+import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.Server;
+import com.boydti.rededit.serializer.VoidSerializer;
 import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.TeleportUtil;
 import com.sk89q.minecraft.util.commands.Command;
@@ -26,10 +28,19 @@ public class TeleportCommands {
 
     private final TeleportUtil util;
     private final Network controller;
+    private final RemoteCall refreshWarps;
 
     public TeleportCommands(TeleportUtil util, Network controller) {
         this.util = util;
         this.controller = controller;
+
+        this.refreshWarps = new RemoteCall() {
+            @Override
+            public Object run(Server sender, Object arg) {
+                RedEdit.get().unloadWarps();
+                return null;
+            }
+        }.setSerializer(new VoidSerializer(), new VoidSerializer());
     }
 
     @Command(
@@ -345,6 +356,7 @@ public class TeleportCommands {
         warp.Z = pos.getBlockZ();
         conf.addWarp(name, warp);
         conf.save();
+        refreshWarps.call(0, 0, null);
         M.WARP_SET.send(fp, name);
     }
 
