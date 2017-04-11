@@ -11,11 +11,11 @@ public class UserConf extends LocalConfig {
     }
 
     @Create // This value will be generated automatically
-    public ConfigBlock<HOME> HOME;
+    public ConfigBlock<UserConf.HOMES> HOMES;
 
     @Comment({"The user's home locations"})
     @BlockName({}) // The name for the default block
-    public static class HOME extends ConfigBlock {
+    public static class HOMES extends ConfigBlock {
         public int SERVER = 0;
         public String WORLD = "world";
         public int X = 0;
@@ -23,19 +23,19 @@ public class UserConf extends LocalConfig {
         public int Z = 0;
     }
 
-    public HOME getHome(String name) {
-        return HOME.get(name);
+    public UserConf.HOMES getHome(String name) {
+        return HOMES.get(name);
     }
 
-    public HOME deleteHome(String name) {
-        return HOME.remove(name);
+    public UserConf.HOMES deleteHome(String name) {
+        return HOMES.remove(name);
     }
 
-    public Collection<HOME> getHomes() {
-        return Collections.unmodifiableCollection(HOME.getInstances());
+    public Collection<UserConf.HOMES> getHomes() {
+        return Collections.unmodifiableCollection(HOMES.getInstances());
     }
 
-    public void addHome(String name, HOME home) {
-        HOME.put(name, home);
+    public void addHome(String name, UserConf.HOMES home) {
+        HOMES.put(name, home);
     }
 }

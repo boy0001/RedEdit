@@ -237,11 +237,12 @@ public class TeleportCommands {
     public void home(Player player, String name) throws WorldEditException {
         FawePlayer<Object> fp = FawePlayer.wrap(player);
         UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
-        UserConf.HOME home = conf.getHome(name);
+        UserConf.HOMES home = conf.getHome(name);
         if (home == null) {
-            M.HOME_NOT_FOUND.send(fp, StringMan.join(conf.HOME.getSections(), ", "));
+            M.HOME_NOT_FOUND.send(fp, StringMan.join(conf.HOMES.getSections(), ", "));
         } else {
-            Position pos = new Position(fp.getName(), home.WORLD, new Vector(home.X, home.Y, home.Z), home.SERVER);
+            int server = home.SERVER == 0 ? Settings.IMP.SERVER_ID : home.SERVER;
+            Position pos = new Position(fp.getName(), home.WORLD, new Vector(home.X, home.Y, home.Z), server);
             M.TELEPORTING.send(fp, name);
             util.teleport(fp, pos);
         }
@@ -258,7 +259,7 @@ public class TeleportCommands {
     public void delhome(Player player, String name) throws WorldEditException {
         FawePlayer<Object> fp = FawePlayer.wrap(player);
         UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
-        UserConf.HOME home = conf.getHome(name);
+        UserConf.HOMES home = conf.getHome(name);
         if (home == null) {
             M.HOME_NOT_FOUND.send(fp, name);
         } else {
@@ -304,7 +305,7 @@ public class TeleportCommands {
             return;
         }
         UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
-        UserConf.HOME home = new UserConf.HOME();
+        UserConf.HOMES home = new UserConf.HOMES();
         WorldVector pos = player.getPosition();
         home.WORLD = Fawe.imp().getWorldName(pos.getWorld());
         home.SERVER = Settings.IMP.SERVER_ID;

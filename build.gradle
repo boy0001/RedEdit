@@ -44,10 +44,6 @@ dependencies {
     }
 }
 
-configurations.all {
-}
-
-
 def revision = ""
 def buildNumber = ""
 def semver = ""
