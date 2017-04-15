@@ -12,8 +12,6 @@ import com.boydti.rededit.remote.Group;
 import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.util.MapUtil;
-import com.github.luben.zstd.ZstdInputStream;
-import com.github.luben.zstd.ZstdOutputStream;
 import com.google.common.cache.LoadingCache;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -194,7 +192,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
             //* # = data<br>
             FastByteArrayInputStream fbais = new FastByteArrayInputStream(message);
 //            InputStream stream = new LZ4InputStream(fbais, message.length);
-            InputStream stream = new ZstdInputStream(fbais);
+            InputStream stream = fbais;
             DataInputStream dataStream = new DataInputStream(stream);
             int group = dataStream.readShort();
             int server = dataStream.readShort();
@@ -283,7 +281,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
     public DataOutputStream getOS(byte[] id) throws IOException {
         final FastByteArrayOutputStream fbaos = new FastByteArrayOutputStream();
 //        return new DataOutputStream(new LZ4OutputStream(fbaos, 1024) {
-        return new DataOutputStream(new ZstdOutputStream(fbaos, 0) {
+        return new DataOutputStream(fbaos) {
             private boolean closed = false;
 
             @Override
@@ -298,14 +296,14 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
                     sendMessageRaw(id, fbaos.toByteArray());
                 }
             }
-        });
+        };
     }
 
     private void sendMessage(Channel channel, byte[] message) {
         final FastByteArrayOutputStream fbaos = new FastByteArrayOutputStream();
         try {
 //            OutputStream os = new LZ4OutputStream(fbaos, Math.max(12, message.length));
-            OutputStream os = new ZstdOutputStream(fbaos, Math.max(12, message.length));
+            OutputStream os = fbaos;
             os.write(message);
             os.close();
         } catch (IOException e) {
