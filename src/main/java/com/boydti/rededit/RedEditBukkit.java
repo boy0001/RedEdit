@@ -19,7 +19,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listener {
 
-    private RedEdit rededit;
     private PlayerJoinEvent playerJoin = new PlayerJoinEvent();
     private PlayerQuitEvent playerQuit = new PlayerQuitEvent();
 
@@ -30,7 +29,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
 
     @Override
     public void onDisable() {
-        this.rededit.close();
+        RedEdit.get().close();
     }
 
     @Override
