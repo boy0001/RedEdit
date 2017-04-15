@@ -29,7 +29,7 @@ public class PlotData implements Serializable {
     public String alias;
     public HashMap<String, String> flags;
 
-
+    public PlotData() {}
 
     public PlotData(Plot plot) {
         this.temp = plot.temp;

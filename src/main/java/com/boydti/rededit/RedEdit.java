@@ -1,18 +1,21 @@
 package com.boydti.rededit;
 
 import com.boydti.fawe.util.MainUtil;
+import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.command.teleport.TeleportCommands;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.config.UserConf;
 import com.boydti.rededit.config.WarpConf;
+import com.boydti.rededit.listener.Network;
 import com.boydti.rededit.listener.PlayerListener;
 import com.boydti.rededit.listener.RedEditPubSub;
-import com.boydti.rededit.listener.Network;
 import com.boydti.rededit.remote.Channel;
+import com.boydti.rededit.test.BasicTaskMan;
+import com.boydti.rededit.test.NullPlugin;
 import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.MapUtil;
-import com.boydti.rededit.util.plot.PlotLoader;
 import com.boydti.rededit.util.TeleportUtil;
+import com.boydti.rededit.util.plot.PlotLoader;
 import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.extension.platform.CommandManager;
 import java.io.File;
@@ -28,6 +31,9 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.exceptions.JedisException;
 
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Uses Redis to run code on multiple server instances with minimal effort
  */
@@ -35,7 +41,15 @@ public class RedEdit {
 
     private static RedEdit INSTANCE;
 
-    private final IRedEditPlugin IMP;
+    static {
+        try {
+            INSTANCE = new RedEdit();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private IRedEditPlugin IMP = new NullPlugin();
     private final JedisPool POOL;
     private final RedEditPubSub LISTENER;
     private final File SETTINGS_FILE;
@@ -50,9 +64,9 @@ public class RedEdit {
     private Jedis JEDIS;
     private PlayerListener playerListener;
 
-    public RedEdit(IRedEditPlugin imp) throws URISyntaxException, IOException {
+    private RedEdit() throws URISyntaxException, IOException {
+        if (TaskManager.IMP == null) TaskManager.IMP = new BasicTaskMan(5);
         INSTANCE = this;
-        IMP = imp;
         URL url = RedEdit.class.getProtectionDomain().getCodeSource().getLocation();
         FILE = new File(new URL(url.toURI().toString().split("\\!")[0].replaceAll("jar:file", "file")).toURI().getPath());
         DIR = new File(FILE.getParentFile(), "RedEdit");
@@ -79,6 +93,12 @@ public class RedEdit {
         setupEvents();
         setupCommands();
         users = MapUtil.getExpiringMap(60, TimeUnit.SECONDS);
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                close();
+            }
+        }));
     }
 
     public WarpConf getWarpConfig() {
@@ -111,6 +131,15 @@ public class RedEdit {
         return INSTANCE.IMP;
     }
 
+    public boolean isInitialized() {
+        return !(IMP instanceof NullPlugin);
+    }
+
+    public void init(IRedEditPlugin plugin) {
+        checkNotNull(plugin);
+        IMP = plugin;
+    }
+
     public TeleportUtil getTeleportUtil() {
         return util;
     }
@@ -127,7 +156,7 @@ public class RedEdit {
         return LISTENER;
     }
 
-    public void close() {
+    public synchronized void close() {
         if (LISTENER != null) {
             LISTENER.close();
         }
@@ -143,11 +172,13 @@ public class RedEdit {
                 e.printStackTrace();
             }
         }
+        RUNNING.clear();
         if (JEDIS != null) {
             try {
                 POOL.returnBrokenResource(JEDIS);
                 POOL.returnResource(JEDIS);
             } catch (JedisException ignore) {}
+            JEDIS = null;
         }
     }
 

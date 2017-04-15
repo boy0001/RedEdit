@@ -12,11 +12,15 @@ import com.boydti.rededit.remote.Group;
 import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.util.MapUtil;
+import com.github.luben.zstd.ZstdInputStream;
+import com.github.luben.zstd.ZstdOutputStream;
 import com.google.common.cache.LoadingCache;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -29,8 +33,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import net.jpountz.lz4.LZ4InputStream;
-import net.jpountz.lz4.LZ4OutputStream;
 import redis.clients.jedis.BinaryJedisPubSub;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -56,6 +58,21 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
 
     private ConcurrentHashMap<Integer, RemoteCall> FUNCTIONS = new ConcurrentHashMap<>();
     private AtomicBoolean started = new AtomicBoolean();
+
+    public int getAlive(int groupId, int serverId) {
+        if (groupId == 0) {
+            if (serverId == 0) {
+                return (int) ALIVE_SERVERS.size();
+            }
+            return ALIVE_SERVERS.getIfPresent(serverId) != null ? 1 : 0;
+        }
+        if (serverId == 0) {
+            Group group = ALIVE_GROUPS.getIfPresent(groupId);
+            return group != null ? group.getServerCount() : 0;
+        }
+        Server server = ALIVE_SERVERS.getIfPresent(serverId);
+        return server != null && server.getChannel().getGroup() == groupId ? 1 : 0;
+    }
 
     public RedEditPubSub(JedisPool pool) throws IOException {
         this.POOL = pool;
@@ -162,8 +179,8 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
 
     @Override
     public void close() {
-        executorService.shutdownNow();
         sendMessage(EVERYONE, DEAD_MESSAGE);
+        executorService.shutdownNow();
         POOL = null;
     }
 
@@ -176,7 +193,8 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
             //* 1 = send or receive<br>
             //* # = data<br>
             FastByteArrayInputStream fbais = new FastByteArrayInputStream(message);
-            LZ4InputStream stream = new LZ4InputStream(fbais, message.length);
+//            InputStream stream = new LZ4InputStream(fbais, message.length);
+            InputStream stream = new ZstdInputStream(fbais);
             DataInputStream dataStream = new DataInputStream(stream);
             int group = dataStream.readShort();
             int server = dataStream.readShort();
@@ -264,12 +282,19 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
 
     public DataOutputStream getOS(byte[] id) throws IOException {
         final FastByteArrayOutputStream fbaos = new FastByteArrayOutputStream();
-        return new DataOutputStream(new LZ4OutputStream(fbaos, 1024) {
+//        return new DataOutputStream(new LZ4OutputStream(fbaos, 1024) {
+        return new DataOutputStream(new ZstdOutputStream(fbaos, 0) {
             private boolean closed = false;
+
+            @Override
+            public void flush() throws IOException {
+                if (!closed) super.flush();
+            }
+
             @Override
             public void close() throws IOException {
-                super.close();
                 if (closed != (closed = true)) {
+                    super.close();
                     sendMessageRaw(id, fbaos.toByteArray());
                 }
             }
@@ -279,7 +304,8 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
     private void sendMessage(Channel channel, byte[] message) {
         final FastByteArrayOutputStream fbaos = new FastByteArrayOutputStream();
         try {
-            LZ4OutputStream os = new LZ4OutputStream(fbaos, Math.max(12, message.length));
+//            OutputStream os = new LZ4OutputStream(fbaos, Math.max(12, message.length));
+            OutputStream os = new ZstdOutputStream(fbaos, Math.max(12, message.length));
             os.write(message);
             os.close();
         } catch (IOException e) {

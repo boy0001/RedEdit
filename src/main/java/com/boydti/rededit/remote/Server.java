@@ -1,6 +1,8 @@
 package com.boydti.rededit.remote;
 
+import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.Metadatable;
+import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.listener.Network;
 import java.util.Collection;
@@ -57,6 +59,10 @@ public class Server extends Metadatable {
 
     public boolean hasPlayer(String player) {
         return players.containsKey(player.toLowerCase());
+    }
+
+    public void teleportPlayer(FawePlayer player) {
+        RedEdit.imp().teleport(player, getName());
     }
 
     public Network getServerController() {

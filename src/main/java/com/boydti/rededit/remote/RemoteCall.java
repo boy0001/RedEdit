@@ -1,5 +1,6 @@
 package com.boydti.rededit.remote;
 
+import com.boydti.fawe.Fawe;
 import com.boydti.fawe.object.RunnableVal2;
 import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.config.Settings;
@@ -13,6 +14,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -149,7 +151,6 @@ public abstract class RemoteCall<Result, Argument> {
         if (value != null) {
             writeObject(dataOut, value, resOrArg);
         }
-        out.close();
         return true;
     }
 
@@ -242,8 +243,64 @@ public abstract class RemoteCall<Result, Argument> {
             int sequence = getSequenceNumber();
             if (onResult != null) cache.put(sequence, onResult);
             write(os, arg, Type.ARGUMENT, sequence);
-            os.close();
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Map.Entry<Server, Result> any(int withGroup, int withServerId, Argument arg, ResultCall<Result> onResult) {
+        return any(withGroup, withServerId, arg, onResult, 50);
+    }
+
+    public Map.Entry<Server, Result> any(int withGroup, int withServerId, Argument arg) {
+        return any(withGroup, withServerId, arg, 50);
+    }
+
+    public Map.Entry<Server, Result> any(int withGroup, int withServerId, Argument arg, long time) {
+        return any(withGroup, withServerId, arg, new ResultCall<Result>(), time);
+    }
+
+    public Map.Entry<Server, Result> any(int withGroup, int withServerId, Argument arg, ResultCall<Result> onResult, long time) {
+        Map<Server, Result> value = collect(withGroup, withServerId, arg, onResult, -1, time);
+        if (value.isEmpty()) {
+            return null;
+        }
+        return value.entrySet().iterator().next();
+    }
+
+    public Map<Server, Result> collect(int withGroup, int withServerId, Argument arg, ResultCall<Result> onResult) {
+        return collect(withGroup, withServerId, arg, onResult, Integer.MAX_VALUE, 50);
+    }
+
+    public Map<Server, Result> collect(int withGroup, int withServerId, Argument arg) {
+        return collect(withGroup, withServerId, arg, Integer.MAX_VALUE, 50);
+    }
+
+    public Map<Server, Result> collect(int withGroup, int withServerId, Argument arg, int amount, long time) {
+        return collect(withGroup, withServerId, arg, new ResultCall<Result>(), amount, time);
+    }
+
+    public Map<Server, Result> collect(int withGroup, int withServerId, Argument arg, ResultCall<Result> onResult, int amount, long time) {
+        if (Fawe.isMainThread()) {
+            Fawe.debug(getClass().getName() + " called from main thread!");
+        }
+        try {
+            RedEditPubSub scheduler = RedEdit.get().getScheduler();
+            int listening = scheduler.getAlive(withServerId, withServerId);
+            if (listening == 0) {
+                return onResult.getResults();
+            }
+            amount = Math.min(amount, listening);
+            onResult.setNumResults(amount);
+            OutputStream os = scheduler.getOS(Channel.getId(withGroup, withServerId));
+            int sequence = getSequenceNumber();
+            cache.put(sequence, onResult);
+            write(os, arg, Type.ARGUMENT, sequence);
+            synchronized (onResult) {
+                onResult.wait(time);
+            }
+            return onResult.getResults();
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

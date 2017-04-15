@@ -28,6 +28,17 @@ public class Group {
         return servers;
     }
 
+    public int getServerCount() {
+        int total = 0;
+        int groupId = channel.getGroup();
+        for (Server server : reps.getServers()) {
+            if (server.getChannel().getGroup() == groupId) {
+                total++;
+            }
+        }
+        return total;
+    }
+
     public Channel getChannel() {
         return channel;
     }

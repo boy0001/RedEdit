@@ -6,8 +6,6 @@ import com.boydti.rededit.events.PlayerJoinEvent;
 import com.boydti.rededit.events.PlayerQuitEvent;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,14 +25,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
 
     @Override
     public void onEnable() {
-        try {
-            this.rededit = new RedEdit(this);
-            this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        RedEdit.get().init(this);
     }
 
     @Override

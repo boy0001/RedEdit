@@ -9,7 +9,11 @@ public class StringArraySerializer implements Serializer<String[]> {
     public void write(DataOutputStream dout, String[] values) throws IOException {
         dout.writeInt(values.length);
         for (String value : values) {
-            dout.writeUTF(value);
+            boolean present = value != null;
+            dout.writeBoolean(present);
+            if (present) {
+                dout.writeUTF(value);
+            }
         }
     }
 
@@ -17,7 +21,7 @@ public class StringArraySerializer implements Serializer<String[]> {
     public String[] read(DataInputStream din) throws IOException {
         String[] values = new String[din.readInt()];
         for (int i = 0; i < values.length; i++) {
-            values[i] = din.readUTF();
+            if (din.readBoolean()) values[i] = din.readUTF();
         }
         return values;
     }
