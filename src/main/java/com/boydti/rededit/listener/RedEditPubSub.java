@@ -270,6 +270,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
         if (FUNCTIONS.containsKey(packet.getId())) {
             throw new IllegalStateException("Packet with ID: " + packet.getId() + " is already registered!");
         }
+        Fawe.debug("Registering " + packet.getId() + " : " + packet.getClass());
         FUNCTIONS.put(packet.getId(), packet);
         return packet;
     }

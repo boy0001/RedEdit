@@ -50,7 +50,8 @@ public class PlotData implements Serializable {
         this.pz = pos.z;
         this.yaw = pos.yaw;
         this.pitch = pos.pitch;
-        for (Map.Entry<Flag<?>, Object> entry : plot.getFlags().entrySet()) {
+        this.flags = new HashMap<>();
+        for (Map.Entry<Flag<?>, Object> entry : plot.getSettings().flags.entrySet()) {
             Flag<?> flag = entry.getKey();
             flags.put(flag.getName(), flag.valueToString(entry.getValue()));
         }
