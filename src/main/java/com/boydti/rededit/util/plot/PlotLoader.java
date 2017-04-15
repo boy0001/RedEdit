@@ -34,7 +34,10 @@ public class PlotLoader {
         this.syncPlot = new RemoteCall<Object, PlotData>() {
             @Override
             public Object run(Server sender, PlotData plot) {
-                if (sender.getId() != Settings.IMP.SERVER_ID) plot.load();
+                if (sender.getId() != Settings.IMP.SERVER_ID) {
+                    System.out.println("Loading " + plot.x + "," + plot.y);
+                    plot.load();
+                }
                 return null;
             }
         };
@@ -159,8 +162,10 @@ public class PlotLoader {
 
     public void syncPlot(Plot plot) {
         if (plot.getArea() == null) {
+            System.out.println("Cannot sync plot with no area: " + plot);
             return;
         }
+        System.out.println("Syncing plot " + plot + " with group " + Settings.IMP.SERVER_GROUP);
         syncPlot.call(Settings.IMP.SERVER_GROUP, 0, new PlotData(plot));
     }
 
