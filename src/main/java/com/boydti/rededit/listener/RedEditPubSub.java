@@ -213,13 +213,15 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
                         setDead(channel);
                         break;
                     default:
-                        throw new UnsupportedOperationException("Invalid state: " + state);
+                        Fawe.debug("Invalid state: " + state);
+                        return;
                 }
                 return;
             }
             RemoteCall packet = FUNCTIONS.get(method);
             if (packet == null) {
-                throw new UnsupportedOperationException("No protocol found for: " + method);
+                Fawe.debug("No protocol found for: " + method + " from channel " + channel.toString());
+                return;
             }
             short sequence = dataStream.readShort();
             RemoteCall.Type type = RemoteCall.Type.values()[dataStream.read()];
@@ -242,9 +244,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
                     break;
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
