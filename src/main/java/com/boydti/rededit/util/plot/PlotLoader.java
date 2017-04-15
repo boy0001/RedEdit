@@ -165,7 +165,7 @@ public class PlotLoader {
             System.out.println("Cannot sync plot with no area: " + plot);
             return;
         }
-        System.out.println("Syncing plot " + plot + " with group " + Settings.IMP.SERVER_GROUP);
+        System.out.println("Syncing plot " + plot + " with group " + Settings.IMP.SERVER_GROUP + " | " + RedEdit.get().getNetwork().getGroup(Settings.IMP.SERVER_GROUP).getServerCount());
         syncPlot.call(Settings.IMP.SERVER_GROUP, 0, new PlotData(plot));
     }
 
