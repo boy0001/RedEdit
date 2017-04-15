@@ -23,14 +23,14 @@ public class PlotLoader {
         this.syncPlot = new RemoteCall<Object, PlotData>() {
             @Override
             public Object run(Server sender, PlotData plot) {
-                plot.load();
+                if (sender.getId() != Settings.IMP.SERVER_ID) plot.load();
                 return null;
             }
         };
         this.deletePlot = new RemoteCall<Object, PlotData>() {
             @Override
             public Object run(Server sender, PlotData arg) {
-                arg.remove();
+                if (sender.getId() != Settings.IMP.SERVER_ID) arg.remove();
                 return null;
             }
         };
