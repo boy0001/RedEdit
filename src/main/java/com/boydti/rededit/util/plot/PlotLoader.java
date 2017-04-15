@@ -8,6 +8,7 @@ import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.ResultCall;
 import com.boydti.rededit.remote.Server;
+import com.intellectualcrafters.configuration.ConfigurationSection;
 import com.intellectualcrafters.plot.PS;
 import com.intellectualcrafters.plot.database.DBFunc;
 import com.intellectualcrafters.plot.object.Plot;
@@ -80,7 +81,23 @@ public class PlotLoader {
         };
         PlotAreaManager manager = PS.get().getPlotAreaManager();
         if (manager instanceof SinglePlotAreaManager) {
-            ((SinglePlotAreaManager) manager).setArea(new NetworkPlotArea(this));
+            SinglePlotAreaManager singleManager = (SinglePlotAreaManager) manager;
+            SinglePlotArea area = singleManager.getArea();
+            NetworkPlotArea newArea = new NetworkPlotArea(this);
+            singleManager.setArea(newArea);
+            ConfigurationSection section = PS.get().worlds.getConfigurationSection("worlds.*");
+            if (section == null) {
+                section = PS.get().worlds.createSection("worlds.*");
+            }
+            newArea.saveConfiguration(section);
+            newArea.loadDefaultConfiguration(section);
+            area.foreachPlotAbs(new com.intellectualcrafters.plot.object.RunnableVal<Plot>() {
+                @Override
+                public void run(Plot plot) {
+                    plot.setArea(newArea);
+                }
+            });
+
         }
         DBFunc.dbManager = new DelegateDB(DBFunc.dbManager, this);
     }
