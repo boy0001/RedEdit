@@ -5,6 +5,7 @@ import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.RunnableVal;
 import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.config.Settings;
+import com.boydti.rededit.remote.Group;
 import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.ResultCall;
 import com.boydti.rededit.remote.Server;
@@ -165,7 +166,13 @@ public class PlotLoader {
             System.out.println("Cannot sync plot with no area: " + plot);
             return;
         }
-        System.out.println("Syncing plot " + plot + " with group " + Settings.IMP.SERVER_GROUP + " | " + RedEdit.get().getNetwork().getGroup(Settings.IMP.SERVER_GROUP).getServerCount());
+        System.out.println("Syncing plot " + plot + " with group " + Settings.IMP.SERVER_GROUP);
+        Group group = RedEdit.get().getNetwork().getGroup(Settings.IMP.SERVER_GROUP);
+        if (group != null) {
+            System.out.println("Group servers " + group.getServerCount());
+        } else {
+            System.out.println("Group not found");
+        }
         syncPlot.call(Settings.IMP.SERVER_GROUP, 0, new PlotData(plot));
     }
 
