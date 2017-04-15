@@ -17,6 +17,7 @@ import com.boydti.rededit.serializer.EnumSerializer;
 import com.boydti.rededit.serializer.PositionSerializer;
 import com.boydti.rededit.serializer.StringArraySerializer;
 import com.boydti.rededit.serializer.VoidSerializer;
+import com.boydti.rededit.util.plot.PlotLoader;
 import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldVector;

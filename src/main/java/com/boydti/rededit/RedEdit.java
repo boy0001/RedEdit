@@ -11,7 +11,7 @@ import com.boydti.rededit.listener.Network;
 import com.boydti.rededit.remote.Channel;
 import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.MapUtil;
-import com.boydti.rededit.util.PlotLoader;
+import com.boydti.rededit.util.plot.PlotLoader;
 import com.boydti.rededit.util.TeleportUtil;
 import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.extension.platform.CommandManager;

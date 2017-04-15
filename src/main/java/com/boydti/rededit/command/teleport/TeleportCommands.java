@@ -34,7 +34,7 @@ public class TeleportCommands {
         this.util = util;
         this.controller = controller;
 
-        this.refreshWarps = new RemoteCall() {
+        this.refreshWarps = new RemoteCall<Object, Object>() {
             @Override
             public Object run(Server sender, Object arg) {
                 RedEdit.get().unloadWarps();
