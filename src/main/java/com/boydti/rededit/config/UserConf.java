@@ -18,9 +18,9 @@ public class UserConf extends LocalConfig {
     public static class HOMES extends ConfigBlock {
         public int SERVER = 0;
         public String WORLD = "world";
-        public int X = 0;
-        public int Y = 0;
-        public int Z = 0;
+        public double X = 0;
+        public double Y = 0;
+        public double Z = 0;
     }
 
     public UserConf.HOMES getHome(String name) {
