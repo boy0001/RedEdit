@@ -33,8 +33,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     public void onEnable() {
         RedEdit.init(this);
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        Bukkit.getPluginManager().registerEvents(this, this);
-        final int timeout = 2;
+        final int timeout = 1;
         TaskManager.IMP.repeat(new Runnable() {
             @Override
             public void run() {
