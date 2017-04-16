@@ -247,7 +247,7 @@ public class TeleportCommands {
         int index = ThreadLocalRandom.current().nextInt(size);
         Server current = null;
         Iterator<Server> iter = servers.iterator();
-        for (int i = 0; i < index && iter.hasNext(); i++) {
+        for (int i = 0; i <= index && iter.hasNext(); i++) {
             current = iter.next();
         }
         if (current != null) {
