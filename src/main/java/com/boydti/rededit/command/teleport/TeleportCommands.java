@@ -10,6 +10,7 @@ import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.config.UserConf;
 import com.boydti.rededit.config.WarpConf;
 import com.boydti.rededit.listener.Network;
+import com.boydti.rededit.remote.Group;
 import com.boydti.rededit.remote.Position;
 import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.Server;
@@ -23,6 +24,9 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.util.command.parametric.Optional;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TeleportCommands {
 
@@ -222,6 +226,37 @@ public class TeleportCommands {
             M.NO_BACK.send(fp);
         } else {
             M.TELEPORTING.send(fp, "BACK");
+        }
+    }
+
+    @Command(
+            aliases = { "/tpgroup", "/tpg", "/teleportgroup" },
+            desc = "Teleport to a random server in a group",
+            min = 1,
+            max = 1
+    )
+    @CommandPermissions("rededit.back")
+    public void group(Player player, int groupId) throws WorldEditException {
+        Group group = controller.getGroup(groupId);
+        if (group == null) {
+            M.GROUP_NOT_FOUND.send(player);
+            return;
+        }
+        Collection<Server> servers = group.getServers();
+        int size = servers.size();
+        int index = ThreadLocalRandom.current().nextInt(size);
+        Server current = null;
+        Iterator<Server> iter = servers.iterator();
+        for (int i = 0; i < index && iter.hasNext(); i++) {
+            current = iter.next();
+        }
+        if (current != null) {
+            FawePlayer<Object> fp = FawePlayer.wrap(player);
+            M.TELEPORTING.send(fp, current.getName());
+            current.teleportPlayer(fp);
+        } else {
+            M.GROUP_NOT_FOUND.send(player);
+            return;
         }
     }
 
