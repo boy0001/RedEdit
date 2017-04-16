@@ -73,9 +73,12 @@ public class RedEdit {
         }
         LISTENER = new RedEditPubSub(POOL);
         PlotLoader loader = null;
-        try {
-            loader = new PlotLoader();
-        } catch (Throwable ignore) {}
+        if (Settings.IMP.PLOTSQUARED_SYNC) {
+            try {
+                loader = new PlotLoader();
+            } catch (Throwable ignore) {
+            }
+        }
         this.util = new TeleportUtil(loader);
         // Subscribe
         // 0000 - Any + Any

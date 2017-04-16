@@ -180,6 +180,15 @@ public class TeleportUtil {
         } else if (previous.getPosition() != null) {
             WorldVector pos = fp.getPlayer().getPosition();
             fp.setMeta("teleportBack", new Position(fp.getName(), Fawe.imp().getWorldName(pos.getWorld()), pos, Settings.IMP.SERVER_ID));
+            String world = previous.getWorld();
+            if (world != null && loader != null) {
+                Server server = loader.getLoadedServer(world);
+                if (server != null) {
+                    Vector v = previous.getPosition();
+                    teleport(fp, server.getId(), world, v);
+                    return true;
+                }
+            }
             TaskManager.IMP.sync(new RunnableVal<Object>() {
                 @Override
                 public void run(Object o) {
@@ -203,6 +212,13 @@ public class TeleportUtil {
             serverId = Settings.IMP.SERVER_ID;
         }
         Server server = RedEdit.get().getNetwork().getServer(serverId);
+        if (loader != null) {
+            Server newServer = loader.getLoadedServer(world);
+            if (newServer != null) {
+                server = newServer;
+                serverId = newServer.getId();
+            }
+        }
         if (server == null) {
             return false;
         }

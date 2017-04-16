@@ -20,6 +20,8 @@ public class Settings extends Config {
     })
     public int SERVER_ID = 1;
 
+    public boolean PLOTSQUARED_SYNC = true;
+
     @Create
     public PATHS PATHS;
 
