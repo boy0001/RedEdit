@@ -99,9 +99,8 @@ public class PlotData implements Serializable {
                 plot = new Plot(id, owner, trusted, members, denied, alias, pos, null, area, merged, timestamp, temp);
                 plot.getSettings().flags = newFlags;
                 Map<PlotId, Plot> map = area.getPlotsRaw();
-                Plot existing = map.put(id, plot);
-                if (existing != null) {
-                    PS.debug("Replacing plot: " + existing);
+                if (!area.addPlot(plot)) {
+                    PS.debug("Replacing plot: " + plot);
                 }
             } else {
                 PS.debug("Unable to sync plot: " + worldName + (areaId != null ? ";" + areaId : "") + ";" + x + ";" + y);
@@ -126,11 +125,14 @@ public class PlotData implements Serializable {
         PlotArea area = PS.get().getPlotArea(worldName, areaId);
         PlotId id = new PlotId(x, y);
         if (area != null) {
+            System.out.println("Area " + area);
             Plot plot = area.getPlot(id);
             if (plot != null && plot.temp == temp) {
+                System.out.println("Plot is " + plot + " | " + area.getClass() + " | " + plot.getClass());
                 return plot;
             }
         }
+        System.out.println("Cannot find area " + worldName + " | " + areaId);
         for (Plot plot : PS.get().getPlots()) {
             if (plot.temp == temp) {
                 PlotArea newArea = PS.get().getPlotArea(worldName, areaId);
@@ -152,6 +154,13 @@ public class PlotData implements Serializable {
                 } else {
                     PS.debug("Unable to find area: " + area + " to sync plot: " + plot);
                 }
+                return plot;
+            }
+        }
+        if (area != null) {
+            Plot plot = area.getPlot(id);
+            if (plot != null && !plot.hasOwner()) {
+                area.addPlot(plot);
                 return plot;
             }
         }
