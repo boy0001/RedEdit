@@ -39,15 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class RedEdit {
 
-    private static RedEdit INSTANCE;
-
-    static {
-        try {
-            INSTANCE = new RedEdit();
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private static volatile RedEdit INSTANCE;
 
     private IRedEditPlugin IMP = new NullPlugin();
     private final JedisPool POOL;
@@ -64,9 +56,10 @@ public class RedEdit {
     private Jedis JEDIS;
     private PlayerListener playerListener;
 
-    private RedEdit() throws URISyntaxException, IOException {
+    private RedEdit(IRedEditPlugin plugin) throws URISyntaxException, IOException {
         if (TaskManager.IMP == null) TaskManager.IMP = new BasicTaskMan(5);
         INSTANCE = this;
+        INSTANCE.IMP = plugin;
         URL url = RedEdit.class.getProtectionDomain().getCodeSource().getLocation();
         FILE = new File(new URL(url.toURI().toString().split("\\!")[0].replaceAll("jar:file", "file")).toURI().getPath());
         DIR = new File(FILE.getParentFile(), "RedEdit");
@@ -124,20 +117,41 @@ public class RedEdit {
     }
 
     public static RedEdit get() {
-        return INSTANCE;
+        RedEdit tmp = INSTANCE;
+        if (tmp == null) {
+            try {
+                INSTANCE = tmp = new RedEdit(new NullPlugin());
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return tmp;
     }
 
     public static IRedEditPlugin imp() {
-        return INSTANCE.IMP;
+        return get().IMP;
     }
 
     public boolean isInitialized() {
         return !(IMP instanceof NullPlugin);
     }
 
-    public void init(IRedEditPlugin plugin) {
+    public static void init(IRedEditPlugin plugin) {
         checkNotNull(plugin);
-        IMP = plugin;
+        RedEdit tmp = INSTANCE;
+        if (tmp == null) {
+            try {
+                INSTANCE = tmp = new RedEdit(plugin);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            tmp.IMP = plugin;
+        }
     }
 
     public TeleportUtil getTeleportUtil() {

@@ -24,7 +24,8 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
 
     @Override
     public void onEnable() {
-        RedEdit.get().init(this);
+        RedEdit.init(this);
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
     }
 
     @Override

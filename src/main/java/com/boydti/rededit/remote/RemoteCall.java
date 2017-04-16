@@ -290,8 +290,7 @@ public abstract class RemoteCall<Result, Argument> {
             if (listening == 0) {
                 return onResult.getResults();
             }
-            amount = Math.min(amount, listening);
-            onResult.setNumResults(amount);
+            onResult.setNumResults(amount, listening);
             OutputStream os = scheduler.getOS(Channel.getId(withGroup, withServerId));
             int sequence = getSequenceNumber();
             cache.put(sequence, onResult);

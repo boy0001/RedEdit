@@ -9,6 +9,7 @@ import com.intellectualcrafters.plot.object.PlotArea;
 import com.intellectualcrafters.plot.object.PlotId;
 import com.intellectualcrafters.plot.object.PlotPlayer;
 import com.intellectualcrafters.plot.object.worlds.SinglePlot;
+import com.intellectualcrafters.plot.util.WorldUtil;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -46,12 +47,15 @@ public class NetworkPlot extends SinglePlot {
             loader.teleport(fp, server, this);
             return false;
         } else {
+            if (!isLoaded()) {
+                this.getArea().loadWorld(this.getId());
+            }
             return super.teleportPlayer(player);
         }
     }
 
     @Override
     public boolean isLoaded() {
-        return super.isLoaded();
+        return WorldUtil.IMP.isWorld(getWorldName());
     }
 }

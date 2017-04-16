@@ -8,26 +8,33 @@ public class ResultCall<T> extends RunnableVal2<Server, T> {
 
     private ConcurrentHashMap<Server, T> results = new ConcurrentHashMap<>();
     private AtomicInteger returned = new AtomicInteger();
+    private AtomicInteger added = new AtomicInteger();
 
-    private int target;
+    private int targetMin;
+    private int targetMax;
 
     @Override
     public final void run(Server server, T result) {
-        add(server, result);
-        int size = returned.incrementAndGet();
-        if (size >= target) {
+        int sizeA = Integer.MIN_VALUE;
+        if (add(server, result)) {
+            sizeA = added.incrementAndGet();
+        }
+        int sizeR = returned.incrementAndGet();
+        if (sizeR >= targetMax || sizeA >= targetMin) {
             synchronized (this) {
                 this.notifyAll();
             }
         }
     }
 
-    public void add(Server server, T result) {
+    public boolean add(Server server, T result) {
         results.put(server, result);
+        return true;
     }
 
-    public final void setNumResults(int target) {
-        this.target = target;
+    public final void setNumResults(int min, int max) {
+        this.targetMin = min;
+        this.targetMax = max;
     }
 
     public final ConcurrentHashMap<Server, T> getResults() {

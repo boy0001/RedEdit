@@ -125,14 +125,11 @@ public class PlotData implements Serializable {
         PlotArea area = PS.get().getPlotArea(worldName, areaId);
         PlotId id = new PlotId(x, y);
         if (area != null) {
-            System.out.println("Area " + area);
             Plot plot = area.getPlot(id);
             if (plot != null && plot.temp == temp) {
-                System.out.println("Plot is " + plot + " | " + area.getClass() + " | " + plot.getClass());
                 return plot;
             }
         }
-        System.out.println("Cannot find area " + worldName + " | " + areaId);
         for (Plot plot : PS.get().getPlots()) {
             if (plot.temp == temp) {
                 PlotArea newArea = PS.get().getPlotArea(worldName, areaId);

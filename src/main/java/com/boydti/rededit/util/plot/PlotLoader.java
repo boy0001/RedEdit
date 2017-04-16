@@ -5,7 +5,6 @@ import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.RunnableVal;
 import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.config.Settings;
-import com.boydti.rededit.remote.Group;
 import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.ResultCall;
 import com.boydti.rededit.remote.Server;
@@ -19,6 +18,7 @@ import com.intellectualcrafters.plot.object.PlotPlayer;
 import com.intellectualcrafters.plot.object.worlds.PlotAreaManager;
 import com.intellectualcrafters.plot.object.worlds.SinglePlotArea;
 import com.intellectualcrafters.plot.object.worlds.SinglePlotAreaManager;
+import com.intellectualcrafters.plot.util.WorldUtil;
 import com.sk89q.worldedit.world.World;
 import java.util.AbstractMap;
 import java.util.Map;
@@ -36,7 +36,6 @@ public class PlotLoader {
             @Override
             public Object run(Server sender, PlotData plot) {
                 if (sender.getId() != Settings.IMP.SERVER_ID) {
-                    System.out.println("Loading " + plot.x + "," + plot.y);
                     plot.load();
                 }
                 return null;
@@ -52,7 +51,7 @@ public class PlotLoader {
         this.isLoaded = new RemoteCall<Boolean, String>() {
             @Override
             public Boolean run(Server sender, String arg) {
-                if (FaweAPI.getWorld(arg) != null) {
+                if (WorldUtil.IMP.isWorld(arg)) {
                     return true;
                 }
                 return false;
@@ -73,6 +72,7 @@ public class PlotLoader {
                         RedEdit.get().getPlayerListener().addJoinTask(player, new RunnableVal<FawePlayer>() {
                             @Override
                             public void run(FawePlayer fawePlayer) {
+                                disableTeleport(fawePlayer);
                                 PlotPlayer pp = PlotPlayer.wrap(fawePlayer.getName());
                                 plot.teleportPlayer(pp);
                             }
@@ -101,7 +101,6 @@ public class PlotLoader {
                     plot.setArea(newArea);
                 }
             });
-
         }
         DBFunc.dbManager = new DelegateDB(DBFunc.dbManager, this);
     }
@@ -111,7 +110,7 @@ public class PlotLoader {
             RedEdit.imp().teleport(fp, server.getName());
             // player, world, areaid, idString
             String[] arg = new String[]{fp.getName(), plot.getWorldName(), plot.getArea().id, plot.getId().toString()};
-            this.teleport.call(0, server.getId(), arg);
+            this.teleport.call(server.getChannel().getGroup(), server.getId(), arg);
         } else {
             plot.teleportPlayer(PlotPlayer.wrap(fp.getName()));
         }
@@ -141,8 +140,12 @@ public class PlotLoader {
         }
         return this.isLoaded.any(Settings.IMP.SERVER_GROUP, 0, world, new ResultCall<Boolean>() {
             @Override
-            public void add(Server server, Boolean result) {
-                if (result) super.add(server, result);
+            public boolean add(Server server, Boolean result) {
+                if (result) {
+                    super.add(server, result);
+                    return true;
+                }
+                return false;
             }
         });
     }
@@ -163,15 +166,7 @@ public class PlotLoader {
 
     public void syncPlot(Plot plot) {
         if (plot.getArea() == null) {
-            System.out.println("Cannot sync plot with no area: " + plot);
             return;
-        }
-        System.out.println("Syncing plot " + plot + " with group " + Settings.IMP.SERVER_GROUP);
-        Group group = RedEdit.get().getNetwork().getGroup(Settings.IMP.SERVER_GROUP);
-        if (group != null) {
-            System.out.println("Group servers " + group.getServerCount());
-        } else {
-            System.out.println("Group not found");
         }
         syncPlot.call(Settings.IMP.SERVER_GROUP, 0, new PlotData(plot));
     }

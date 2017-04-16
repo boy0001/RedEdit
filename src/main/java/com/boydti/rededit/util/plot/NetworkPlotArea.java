@@ -17,16 +17,18 @@ public class NetworkPlotArea extends SinglePlotArea {
         return loader;
     }
 
-    private Plot adapt(Plot p) {
+    @Override
+    protected Plot adapt(Plot p) {
         if (p instanceof NetworkPlot) {
             return p;
         }
         PlotSettings s = p.getSettings();
         p = new NetworkPlot(p.getId(), p.owner, p.getTrusted(), p.getMembers(), p.getDenied(), s.alias,  s.getPosition(), null, this, s.merged, p.getTimestamp(), p.temp);
-        s.flags = s.flags;
+        p.getSettings().flags = s.flags;
         return p;
     }
 
+    @Override
     public Plot getPlotAbs(PlotId id) {
         Plot plot = getOwnedPlotAbs(id);
         if (plot == null) {
@@ -35,6 +37,7 @@ public class NetworkPlotArea extends SinglePlotArea {
         return plot;
     }
 
+    @Override
     public Plot getPlot(PlotId id) {
         // TODO
         Plot plot = getOwnedPlotAbs(id);

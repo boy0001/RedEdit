@@ -21,6 +21,6 @@ public class NullPlugin implements IRedEditPlugin {
 
     @Override
     public String getServerName() {
-        return "TEST";
+        return "PLEASE INITIALIZE THE PLUGIN";
     }
 }
