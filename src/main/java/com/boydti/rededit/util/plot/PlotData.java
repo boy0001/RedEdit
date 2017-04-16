@@ -1,5 +1,6 @@
 package com.boydti.rededit.util.plot;
 
+import com.boydti.rededit.RedEdit;
 import com.intellectualcrafters.plot.PS;
 import com.intellectualcrafters.plot.flag.Flag;
 import com.intellectualcrafters.plot.flag.FlagManager;
@@ -66,7 +67,7 @@ public class PlotData implements Serializable {
                 Object value = flag.parseValue(entry.getValue());
                 newFlags.put(flag, value);
             } else {
-                PS.debug("Ignoring invalid flag: " + entry.getKey());
+                RedEdit.debug("Ignoring invalid flag: " + entry.getKey());
             }
         }
         BlockLoc pos = new BlockLoc(px, py, pz, yaw, pitch);
@@ -100,10 +101,10 @@ public class PlotData implements Serializable {
                 plot.getSettings().flags = newFlags;
                 Map<PlotId, Plot> map = area.getPlotsRaw();
                 if (!area.addPlot(plot)) {
-                    PS.debug("Replacing plot: " + plot);
+                    RedEdit.debug("Replacing plot: " + plot);
                 }
             } else {
-                PS.debug("Unable to sync plot: " + worldName + (areaId != null ? ";" + areaId : "") + ";" + x + ";" + y);
+                RedEdit.debug("Unable to sync plot: " + worldName + (areaId != null ? ";" + areaId : "") + ";" + x + ";" + y);
             }
         }
     }
@@ -149,7 +150,7 @@ public class PlotData implements Serializable {
                     currentId.recalculateHash();
                     plots.put(id, plot);
                 } else {
-                    PS.debug("Unable to find area: " + area + " to sync plot: " + plot);
+                    RedEdit.debug("Unable to find area: " + area + " to sync plot: " + plot);
                 }
                 return plot;
             }

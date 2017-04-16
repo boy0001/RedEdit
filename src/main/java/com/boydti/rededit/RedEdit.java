@@ -1,5 +1,6 @@
 package com.boydti.rededit;
 
+import com.boydti.fawe.Fawe;
 import com.boydti.fawe.util.MainUtil;
 import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.command.teleport.TeleportCommands;
@@ -95,6 +96,12 @@ public class RedEdit {
                 close();
             }
         }));
+    }
+
+    public static void debug(Object o) {
+        if (Settings.IMP.DEBUG) {
+            Fawe.debugPlain(M.getPrefix() + o);
+        }
     }
 
     public WarpConf getWarpConfig() {

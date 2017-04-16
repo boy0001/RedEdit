@@ -1,6 +1,5 @@
 package com.boydti.rededit.util;
 
-import com.boydti.fawe.Fawe;
 import com.boydti.fawe.configuration.MemorySection;
 import com.boydti.fawe.configuration.file.YamlConfiguration;
 import com.boydti.fawe.object.FawePlayer;
@@ -8,6 +7,7 @@ import com.boydti.fawe.object.PseudoRandom;
 import com.boydti.fawe.object.RunnableVal3;
 import com.boydti.fawe.util.MainUtil;
 import com.boydti.fawe.util.StringMan;
+import com.boydti.rededit.RedEdit;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -230,7 +230,7 @@ public enum M {
             return;
         }
         if (actor == null) {
-            Fawe.debug(this.format(args));
+            RedEdit.debug(this.format(args));
         } else {
             try {
                 Method method = actor.getClass().getMethod("print", String.class);
@@ -251,7 +251,7 @@ public enum M {
             return;
         }
         if (player == null) {
-            Fawe.debug(this.format(args));
+            RedEdit.debug(this.format(args));
         } else {
             player.sendMessage((PREFIX.isEmpty() ? "" : PREFIX.s() + " ") + this.format(args));
         }

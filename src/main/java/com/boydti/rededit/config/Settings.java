@@ -20,6 +20,7 @@ public class Settings extends Config {
     })
     public int SERVER_ID = 1;
 
+    public boolean DEBUG = true;
     public boolean PLOTSQUARED_SYNC = true;
 
     @Create

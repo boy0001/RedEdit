@@ -1,6 +1,5 @@
 package com.boydti.rededit.listener;
 
-import com.boydti.fawe.Fawe;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.RunnableVal;
 import com.boydti.rededit.RedEdit;
@@ -77,7 +76,7 @@ public class PlayerListener {
             Collection<String> players = thisServer.getPlayers();
             joinPacket.call(0, server.getId(), players.toArray(new String[players.size()]));
         } else {
-            Fawe.debug("Cannot find server: " + Settings.IMP.SERVER_ID);
+            RedEdit.debug("Cannot find server: " + Settings.IMP.SERVER_ID);
         }
     }
 

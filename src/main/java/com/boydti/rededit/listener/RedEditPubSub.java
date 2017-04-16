@@ -1,6 +1,5 @@
 package com.boydti.rededit.listener;
 
-import com.boydti.fawe.Fawe;
 import com.boydti.fawe.object.io.FastByteArrayInputStream;
 import com.boydti.fawe.object.io.FastByteArrayOutputStream;
 import com.boydti.fawe.util.TaskManager;
@@ -213,14 +212,14 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
                         setDead(channel);
                         break;
                     default:
-                        Fawe.debug("Invalid state: " + state);
+                        RedEdit.debug("Invalid state: " + state);
                         return;
                 }
                 return;
             }
             RemoteCall packet = FUNCTIONS.get(method);
             if (packet == null) {
-                Fawe.debug("No protocol found for: " + method + " from channel " + channel.toString());
+                RedEdit.debug("No protocol found for: " + method + " from channel " + channel.toString());
                 return;
             }
             short sequence = dataStream.readShort();
@@ -230,7 +229,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
 
             Server serverObj = getOrCreateServer(channel);
             if (serverObj == null) {
-                Fawe.debug("Server not found: " + channel);
+                RedEdit.debug("Server not found: " + channel);
                 start();
             }
 
@@ -270,7 +269,7 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
         if (FUNCTIONS.containsKey(packet.getId())) {
             throw new IllegalStateException("Packet with ID: " + packet.getId() + " is already registered!");
         }
-        Fawe.debug("Registering " + packet.getId() + " : " + packet.getClass());
+        RedEdit.debug("Registering " + packet.getId() + " : " + packet.getClass());
         FUNCTIONS.put(packet.getId(), packet);
         return packet;
     }

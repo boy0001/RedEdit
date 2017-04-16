@@ -35,7 +35,7 @@ repositories {
 
 dependencies {
     compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
-    compile 'org.bukkit:bukkit:1.9.4-R0.1-SNAPSHOT'
+    compile name: 'Paper-API'
 //    compile('com.boydti:fawe-api:latest') { transitive = false }
 //    compile 'com.plotsquared:plotsquared-api:latest'
     compile name: 'FastAsyncWorldEdit'

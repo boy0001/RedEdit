@@ -282,7 +282,7 @@ public abstract class RemoteCall<Result, Argument> {
 
     public Map<Server, Result> collect(int withGroup, int withServerId, Argument arg, ResultCall<Result> onResult, int amount, long time) {
         if (Fawe.isMainThread()) {
-            Fawe.debug(getClass().getName() + " called from main thread!");
+            RedEdit.debug(getClass().getName() + " called from main thread!");
         }
         try {
             RedEditPubSub scheduler = RedEdit.get().getScheduler();
