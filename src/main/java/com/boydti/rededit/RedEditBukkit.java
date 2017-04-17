@@ -151,7 +151,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
         Player player = event.getPlayer();
         setViewDistance(player, 1);
