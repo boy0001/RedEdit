@@ -24,9 +24,6 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.util.command.parametric.Optional;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class TeleportCommands {
 
@@ -242,18 +239,11 @@ public class TeleportCommands {
             M.GROUP_NOT_FOUND.send(player);
             return;
         }
-        Collection<Server> servers = group.getServers();
-        int size = servers.size();
-        int index = ThreadLocalRandom.current().nextInt(size);
-        Server current = null;
-        Iterator<Server> iter = servers.iterator();
-        for (int i = 0; i <= index && iter.hasNext(); i++) {
-            current = iter.next();
-        }
-        if (current != null) {
+        Server server = group.getSmallestServer();
+        if (server != null) {
             FawePlayer<Object> fp = FawePlayer.wrap(player);
-            M.TELEPORTING.send(fp, current.getName());
-            current.teleportPlayer(fp);
+            M.TELEPORTING.send(fp, server.getName());
+            server.teleportPlayer(fp);
         } else {
             M.GROUP_NOT_FOUND.send(player);
             return;

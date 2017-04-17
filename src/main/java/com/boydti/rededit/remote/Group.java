@@ -28,6 +28,19 @@ public class Group {
         return servers;
     }
 
+    public Server getSmallestServer() {
+        Server min = null;
+        int count = Integer.MAX_VALUE;
+        for (Server server : getServers()) {
+            int online = server.getPlayerCount();
+            if (online < count) {
+                min = server;
+                count = online;
+            }
+        }
+        return min;
+    }
+
     public int getServerCount() {
         int total = 0;
         int groupId = channel.getGroup();

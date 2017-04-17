@@ -49,6 +49,10 @@ public class Server extends Metadatable {
         return Collections.unmodifiableCollection(players.values());
     }
 
+    public int getPlayerCount() {
+        return players.size();
+    }
+
     public void addPlayer(String player) {
         this.players.put(player.toLowerCase(), player);
     }
