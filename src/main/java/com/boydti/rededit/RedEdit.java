@@ -41,6 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class RedEdit {
 
     private static volatile RedEdit INSTANCE;
+    private PlotLoader loader;
 
     private IRedEditPlugin IMP = new NullPlugin();
     private final JedisPool POOL;
@@ -73,7 +74,6 @@ public class RedEdit {
             POOL = new JedisPool(new JedisPoolConfig(), Settings.IMP.IP, Settings.IMP.PORT, 0, Settings.IMP.PASSWORD);
         }
         LISTENER = new RedEditPubSub(POOL);
-        PlotLoader loader = null;
         if (Settings.IMP.PLOTSQUARED_SYNC) {
             try {
                 loader = new PlotLoader();
@@ -124,6 +124,10 @@ public class RedEdit {
             users.put(user, conf);
         }
         return conf;
+    }
+
+    public PlotLoader getPlotLoader() {
+        return loader;
     }
 
     public static RedEdit get() {

@@ -1,6 +1,5 @@
 package com.boydti.rededit.util.plot;
 
-import com.boydti.fawe.FaweAPI;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.RunnableVal;
 import com.boydti.rededit.RedEdit;
@@ -19,7 +18,6 @@ import com.intellectualcrafters.plot.object.worlds.PlotAreaManager;
 import com.intellectualcrafters.plot.object.worlds.SinglePlotArea;
 import com.intellectualcrafters.plot.object.worlds.SinglePlotAreaManager;
 import com.intellectualcrafters.plot.util.WorldUtil;
-import com.sk89q.worldedit.world.World;
 import java.util.AbstractMap;
 import java.util.Map;
 
@@ -132,13 +130,14 @@ public class PlotLoader {
         }
     }
 
-    public Map.Entry<Server, Boolean> getLoaded(String world) {
-        World loaded = FaweAPI.getWorld(world);
-        if (loaded != null) {
-            Server server = RedEdit.get().getScheduler().getLocalServer();
-            return new AbstractMap.SimpleEntry<>(server, true);
+    public Map.Entry<Server, Boolean> getLoaded(String world, int groupId) {
+        if (groupId == Settings.IMP.SERVER_GROUP) {
+            if (WorldUtil.IMP.isWorld(world)) {
+                Server server = RedEdit.get().getScheduler().getLocalServer();
+                return new AbstractMap.SimpleEntry<>(server, true);
+            }
         }
-        return this.isLoaded.any(Settings.IMP.SERVER_GROUP, 0, world, new ResultCall<Boolean>() {
+        return this.isLoaded.any(groupId, 0, world, new ResultCall<Boolean>() {
             @Override
             public boolean add(Server server, Boolean result) {
                 if (result) {
@@ -151,12 +150,20 @@ public class PlotLoader {
     }
 
     public Server getLoadedServer(String world) {
-        Map.Entry<Server, Boolean> loaded = getLoaded(world);
+        return getLoadedServer(world, Settings.IMP.SERVER_GROUP);
+    }
+
+    public Server getLoadedServer(String world, int groupId) {
+        Map.Entry<Server, Boolean> loaded = getLoaded(world, groupId);
         return loaded != null ? loaded.getKey() : null;
     }
 
     public boolean isLoaded(String world) {
-        Map.Entry<Server, Boolean> loaded = getLoaded(world);
+        return isLoaded(world, Settings.IMP.SERVER_GROUP);
+    }
+
+    public boolean isLoaded(String world, int groupId) {
+        Map.Entry<Server, Boolean> loaded = getLoaded(world, groupId);
         return loaded != null && loaded.getValue();
     }
 

@@ -76,4 +76,9 @@ public class Server extends Metadatable {
     public boolean isRemote() {
         return getId() != Settings.IMP.SERVER_ID;
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

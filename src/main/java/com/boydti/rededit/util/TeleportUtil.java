@@ -9,6 +9,7 @@ import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.command.teleport.TPAResponse;
 import com.boydti.rededit.command.teleport.TeleportRequest;
 import com.boydti.rededit.config.Settings;
+import com.boydti.rededit.listener.Network;
 import com.boydti.rededit.remote.Position;
 import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.Server;
@@ -211,9 +212,16 @@ public class TeleportUtil {
         if (serverId == null || serverId == 0) {
             serverId = Settings.IMP.SERVER_ID;
         }
-        Server server = RedEdit.get().getNetwork().getServer(serverId);
+
+        Network network = RedEdit.get().getNetwork();
+        Server server = serverId == null || serverId == 0 ? network.getLocalServer() : network.getServer(serverId);
         if (loader != null) {
-            Server newServer = loader.getLoadedServer(world);
+            Server newServer;
+            if (server != null) {
+                newServer = loader.getLoadedServer(world, server.getChannel().getGroup());
+            } else {
+                newServer = loader.getLoadedServer(world);
+            }
             if (newServer != null) {
                 server = newServer;
                 serverId = newServer.getId();
