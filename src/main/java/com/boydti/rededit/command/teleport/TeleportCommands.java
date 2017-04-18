@@ -381,7 +381,7 @@ public class TeleportCommands {
         warp.Z = pos.getBlockZ();
         conf.addWarp(name, warp);
         conf.save();
-        refreshWarps.call(0, 0, null);
+        refreshWarps.call(0, 0, true);
         M.WARP_SET.send(fp, name);
     }
 
