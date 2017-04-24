@@ -1,12 +1,9 @@
 package com.boydti.rededit;
 
-import com.boydti.fawe.bukkit.BukkitPlayer;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.events.PlayerJoinEvent;
 import com.boydti.rededit.events.PlayerQuitEvent;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,10 +25,16 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
 
     private PlayerJoinEvent playerJoin = new PlayerJoinEvent();
     private PlayerQuitEvent playerQuit = new PlayerQuitEvent();
+    private IRedEditPlugin imp;
 
     @Override
     public void onEnable() {
-        RedEdit.init(this);
+        try {
+            imp = new RedEditLily();
+        } catch (Throwable e) {
+            imp = new RedEditBungee(this);
+        }
+        RedEdit.init(imp);
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         final int timeout = 1;
         TaskManager.IMP.repeat(new Runnable() {
@@ -56,33 +59,17 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
 
     @Override
     public String getServerName() {
-        return Bukkit.getServerName();
+        return imp.getServerName();
     }
 
     @Override
     public void teleport(FawePlayer fp, String server) {
-        if (server.equals(getServerName())) {
-            return;
-        }
-        Player player = ((BukkitPlayer) fp).parent;
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("Connect");
-        out.writeUTF(server);
-        player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+        imp.teleport(fp, server);
     }
 
     @Override
     public void teleportHere(FawePlayer fp, String otherPlayer) {
-        Player other = Bukkit.getPlayer(otherPlayer);
-        if (other != null) {
-            return;
-        }
-        Player player = ((BukkitPlayer) fp).parent;
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("ConnectOther");
-        out.writeUTF(otherPlayer);
-        out.writeUTF(getServerName());
-        player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+        imp.teleportHere(fp, otherPlayer);
     }
 
     @Override
