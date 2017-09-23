@@ -3,6 +3,7 @@ package com.boydti.rededit;
 import com.boydti.fawe.Fawe;
 import com.boydti.fawe.util.MainUtil;
 import com.boydti.fawe.util.TaskManager;
+import com.boydti.rededit.command.teleport.RedEditCommand;
 import com.boydti.rededit.command.teleport.TeleportCommands;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.config.UserConf;
@@ -212,6 +213,7 @@ public class RedEdit {
 
     private void setupCommands() {
         CommandManager.getInstance().registerCommands(new TeleportCommands(util, getNetwork()));
+        CommandManager.getInstance().registerCommands(new RedEditCommand(), "rededit");
     }
 
     private void setupEvents() {
@@ -237,7 +239,8 @@ public class RedEdit {
         }
     }
 
-    private void setupConfig() {
+    public void setupConfig() {
+        unloadWarps();
         Settings.IMP.load(SETTINGS_FILE);
         Settings.IMP.save(SETTINGS_FILE);
     }

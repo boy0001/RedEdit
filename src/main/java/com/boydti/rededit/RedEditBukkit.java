@@ -26,6 +26,8 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     private PlayerJoinEvent playerJoin = new PlayerJoinEvent();
     private PlayerQuitEvent playerQuit = new PlayerQuitEvent();
     private IRedEditPlugin imp;
+    private static int OFFSET = 6;
+    private static int MAX_DISTANCE = 15;
 
     @Override
     public void onEnable() {
@@ -96,7 +98,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
 
     public void setViewDistance(Player player, int value) {
         UUID uuid = player.getUniqueId();
-        if (value == 10) {
+        if (value == MAX_DISTANCE) {
             views.remove(uuid);
         } else {
             int[] val = views.get(uuid);
@@ -119,7 +121,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
 
     public int getViewDistance(Player player) {
         int[] value = views.get(player.getUniqueId());
-        return value == null ? 10 : value[0];
+        return value == null ? MAX_DISTANCE : value[0];
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -131,7 +133,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     public void onPlayerMove(PlayerMoveEvent event) {
         Location from = event.getFrom();
         Location to = event.getTo();
-        if (from.getBlockX() >> 6 != to.getBlockX() >> 6 || from.getBlockZ() >> 6 != to.getBlockZ() >> 6) {
+        if (from.getBlockX() >> 6 != to.getBlockX() >> OFFSET || from.getBlockZ() >> OFFSET != to.getBlockZ() >> OFFSET) {
             Player player = event.getPlayer();
             int currentView = getViewDistance(player);
             setViewDistance(player, Math.max(currentView - 1, 1));

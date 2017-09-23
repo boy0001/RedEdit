@@ -2,6 +2,9 @@ package com.boydti.rededit.config;
 
 import com.boydti.fawe.config.Config;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public abstract class LocalConfig extends Config {
     @Config.Ignore
@@ -18,7 +21,14 @@ public abstract class LocalConfig extends Config {
     }
 
     public void save() {
-        save(file);
+        try {
+            File tempFile = File.createTempFile("warp.yml", ".yml");
+            tempFile.deleteOnExit();
+            save(tempFile);
+            Files.copy(tempFile.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean load() {
