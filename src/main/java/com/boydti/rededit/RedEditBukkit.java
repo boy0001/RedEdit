@@ -36,7 +36,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
         } catch (Throwable e) {
             imp = new RedEditBungee(this);
         }
-        RedEdit.init(imp);
+        RedEdit.init(this);
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         final int timeout = 1;
         TaskManager.IMP.repeat(new Runnable() {
@@ -84,11 +84,11 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
         List<String> tabs = event.getCompletions();
         String[] buffer = event.getBuffer().split(" ");
         String msg = buffer[buffer.length - 1].toLowerCase();
-        if (msg.length() < 16 || msg.length() > 0) {
+        if (msg.length() < 16 && msg.length() > 0) {
             Collection<String> toAdd = RedEdit.get().getNetwork().getPlayers(msg);
-            if (toAdd.isEmpty()) {
+            if (!toAdd.isEmpty()) {
                 ArrayList<String> both = new ArrayList<>(tabs);
-                both.addAll(tabs);
+                both.addAll(toAdd);
                 event.setCompletions(both);
             }
         }
