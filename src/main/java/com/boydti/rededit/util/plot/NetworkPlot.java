@@ -3,6 +3,7 @@ package com.boydti.rededit.util.plot;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.remote.Server;
+import com.intellectualcrafters.plot.config.C;
 import com.intellectualcrafters.plot.flag.Flag;
 import com.intellectualcrafters.plot.object.BlockLoc;
 import com.intellectualcrafters.plot.object.PlotArea;
@@ -41,16 +42,23 @@ public class NetworkPlot extends SinglePlot {
     public boolean teleportPlayer(PlotPlayer player) {
         PlotLoader loader = getArea().getPlotLoader();
         String world = getWorldName();
-        Server server = loader.getLoadedServer(world);
-        if (server != null && server.getId() != Settings.IMP.SERVER_ID) {
-            FawePlayer<Object> fp = FawePlayer.wrap(player.getName());
-            loader.teleport(fp, server, this);
+        Server server = loader.getClaimedServer(world);
+        if (server == null) {
+            server = loader.load(world);
+        }
+        if (server == null) {
+            player.sendMessage(C.PREFIX + "Failed to load plot, please try again.");
             return false;
-        } else {
+        }
+        if (server.getId() == Settings.IMP.SERVER_ID) {
             if (!isLoaded()) {
                 this.getArea().loadWorld(this.getId());
             }
             return super.teleportPlayer(player);
+        } else {
+            FawePlayer<Object> fp = FawePlayer.wrap(player.getName());
+            loader.teleport(fp, server, this);
+            return false;
         }
     }
 
