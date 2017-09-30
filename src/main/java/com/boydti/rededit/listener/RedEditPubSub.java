@@ -195,7 +195,6 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
             DataInputStream dataStream = new DataInputStream(stream);
             int group = dataStream.readChar();
             int server = dataStream.readChar();
-            System.out.println("Message from " + group + " | " + server);
             Channel channel = new Channel(group, server);
             int method = dataStream.readInt();
             if (method == 0) {

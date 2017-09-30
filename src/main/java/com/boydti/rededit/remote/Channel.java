@@ -19,11 +19,11 @@ public class Channel {
     }
 
     public int getGroup() {
-        return ((id[0] & 0xFF) << 8) + id[1] & 0xFF;
+        return ((id[0] & 0xFF) << 8) + (id[1] & 0xFF);
     }
 
     public int getServer() {
-        return ((id[2] & 0xFF) << 8) + id[3] & 0xFF;
+        return ((id[2] & 0xFF) << 8) + (id[3] & 0xFF);
     }
 
     @Override

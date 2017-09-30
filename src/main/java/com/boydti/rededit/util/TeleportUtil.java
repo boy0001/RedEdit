@@ -59,15 +59,15 @@ public class TeleportUtil {
                             Player player = fawePlayer.getPlayer();
                             final Position back = new Position(pos.getPlayer(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId);
                             fawePlayer.setMeta("teleportBack", back);
+                            if (loader != null) {
+                                loader.disableTeleport(fawePlayer);
+                                if( pos.getWorld() != null) {
+                                    loader.load(pos.getWorld());
+                                }
+                            }
                             TaskManager.IMP.sync(new RunnableVal<Object>() {
                                 @Override
                                 public void run(Object o) {
-                                    if (loader != null) {
-                                        loader.disableTeleport(fawePlayer);
-                                        if( pos.getWorld() != null) {
-                                            loader.load(pos.getWorld());
-                                        }
-                                    }
                                     player.findFreePosition(pos.getPosition(fawePlayer));
                                 }
                             });
@@ -194,12 +194,12 @@ public class TeleportUtil {
                 }
             }
             if (loader != null) loader.disableTeleport(fp);
+            if (loader != null && previous.getWorld() != null) {
+                loader.load(previous.getWorld());
+            }
             TaskManager.IMP.sync(new RunnableVal<Object>() {
                 @Override
                 public void run(Object o) {
-                    if (loader != null && previous.getWorld() != null) {
-                        loader.load(previous.getWorld());
-                    }
                     fp.getPlayer().findFreePosition(previous.getPosition(fp));
                 }
             });

@@ -1,19 +1,29 @@
 package com.boydti.rededit.util.plot;
 
+import com.boydti.fawe.Fawe;
+import com.boydti.fawe.bukkit.wrapper.AsyncWorld;
 import com.boydti.fawe.object.FawePlayer;
+import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.remote.Server;
 import com.intellectualcrafters.plot.config.C;
 import com.intellectualcrafters.plot.flag.Flag;
+import com.intellectualcrafters.plot.generator.GeneratorWrapper;
 import com.intellectualcrafters.plot.object.BlockLoc;
+import com.intellectualcrafters.plot.object.Plot;
 import com.intellectualcrafters.plot.object.PlotArea;
 import com.intellectualcrafters.plot.object.PlotId;
 import com.intellectualcrafters.plot.object.PlotPlayer;
 import com.intellectualcrafters.plot.object.worlds.SinglePlot;
+import com.intellectualcrafters.plot.object.worlds.SingleWorldGenerator;
 import com.intellectualcrafters.plot.util.WorldUtil;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
+import org.bukkit.WorldType;
+import org.bukkit.generator.ChunkGenerator;
 
 public class NetworkPlot extends SinglePlot {
 
@@ -40,26 +50,42 @@ public class NetworkPlot extends SinglePlot {
 
     @Override
     public boolean teleportPlayer(PlotPlayer player) {
-        PlotLoader loader = getArea().getPlotLoader();
-        String world = getWorldName();
-        Server server = loader.getClaimedServer(world);
-        if (server == null) {
-            server = loader.load(world);
-        }
-        if (server == null) {
-            player.sendMessage(C.PREFIX + "Failed to load plot, please try again.");
-            return false;
-        }
-        if (server.getId() == Settings.IMP.SERVER_ID) {
-            if (!isLoaded()) {
-                this.getArea().loadWorld(this.getId());
-            }
+        if (isLoaded() && Fawe.isMainThread()) {
             return super.teleportPlayer(player);
-        } else {
-            FawePlayer<Object> fp = FawePlayer.wrap(player.getName());
-            loader.teleport(fp, server, this);
-            return false;
         }
+        if (!player.isOnline()) return false;
+        Runnable task = () -> {
+            new  Exception().printStackTrace();
+            PlotLoader loader = getArea().getPlotLoader();
+            String world = getWorldName();
+            Server server = loader.getClaimedServer(world);
+            if (server == null) {
+                server = loader.load(world);
+            }
+            if (server == null) {
+                player.sendMessage(C.PREFIX + "Failed to load plot, please try again.");
+                return;
+            }
+            final Plot thisPlot = this;
+            if (server.getId() == Settings.IMP.SERVER_ID) {
+                if (!isLoaded()) {
+                    String worldName = getId().toCommaSeparatedString();
+                    GeneratorWrapper<ChunkGenerator> generator = new SingleWorldGenerator().<ChunkGenerator>specify(worldName);
+                    WorldCreator creator = new WorldCreator(worldName)
+                    .generator(generator.getPlatformGenerator())
+                    .environment(World.Environment.NORMAL)
+                    .type(WorldType.FLAT);
+
+                    AsyncWorld created = AsyncWorld.create(creator);
+                }
+                TaskManager.IMP.task(() -> super.teleportPlayer(player));
+            } else {
+                FawePlayer<Object> fp = FawePlayer.wrap(player.getName());
+                loader.teleport(fp, server, this);
+            }
+        };
+        TaskManager.IMP.taskNow(task, true);
+        return true;
     }
 
     @Override

@@ -71,7 +71,7 @@ public class PlotLoader {
                 if (claimedTime != null) {
                     return claimedTime;
                 }
-                return null;
+                return -1l;
             }
         };
         this.teleport = new RemoteCall<Object, String[]>() {
@@ -123,7 +123,7 @@ public class PlotLoader {
     }
 
     public void claim(String world) {
-        claims.put(world, System.currentTimeMillis());
+        claims.put(world, System.nanoTime());
     }
 
     public void teleport(FawePlayer fp, Server server, Plot plot) {
@@ -196,12 +196,14 @@ public class PlotLoader {
             }
         }
         Map<Server, Long> allClaims = this.getClaimed.collect(groupId, 0, world);
-        if (allClaims.isEmpty()) return null;
+        if (allClaims.isEmpty()) {
+            return null;
+        }
         long lowest = Long.MAX_VALUE;
         Server lowestServer = null;
         for (Map.Entry<Server, Long> entry : allClaims.entrySet()) {
             long time = entry.getValue();
-            if (time < lowest) {
+            if (time >= 0 && time < lowest) {
                 lowest = time;
                 lowestServer = entry.getKey();
             }
