@@ -79,7 +79,6 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
         {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
-            System.out.println("Write " + SERVER_CHANNEL.getGroup() + " | " + SERVER_CHANNEL.getServer());
             dos.writeChar(SERVER_CHANNEL.getGroup());
             dos.writeChar(SERVER_CHANNEL.getServer());
             dos.writeInt(0);
