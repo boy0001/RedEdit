@@ -4,6 +4,7 @@ import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.events.PlayerJoinEvent;
 import com.boydti.rededit.events.PlayerQuitEvent;
+import com.boydti.rededit.util.plot.PlotLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.server.TabCompleteEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listener {
@@ -77,6 +79,14 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     @Override
     public void registerEvents() {
         Bukkit.getPluginManager().registerEvents(this, this);
+    }
+
+    @EventHandler
+    public void onWorldUnload(WorldUnloadEvent event) {
+        PlotLoader loader = RedEdit.get().getPlotLoader();
+        if (loader != null) {
+            loader.claim(event.getWorld().getName());
+        }
     }
 
     @EventHandler

@@ -122,6 +122,10 @@ public class PlotLoader {
         DBFunc.dbManager = new DelegateDB(DBFunc.dbManager, this);
     }
 
+    public void claim(String world) {
+        claims.put(world, System.currentTimeMillis());
+    }
+
     public void teleport(FawePlayer fp, Server server, Plot plot) {
         if (server != null && server.getId() != Settings.IMP.SERVER_ID) {
             RedEdit.imp().teleport(fp, server.getName());
