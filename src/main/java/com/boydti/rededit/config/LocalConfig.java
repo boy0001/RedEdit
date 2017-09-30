@@ -23,9 +23,8 @@ public abstract class LocalConfig extends Config {
     public void save() {
         try {
             File tempFile = File.createTempFile("warp.yml", ".yml");
-            tempFile.deleteOnExit();
             save(tempFile);
-            Files.copy(tempFile.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE);
+            Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
             e.printStackTrace();
         }

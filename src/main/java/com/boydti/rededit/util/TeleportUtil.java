@@ -62,8 +62,11 @@ public class TeleportUtil {
                             TaskManager.IMP.sync(new RunnableVal<Object>() {
                                 @Override
                                 public void run(Object o) {
-                                    if (loader != null && pos.getWorld() != null) {
-                                        loader.load(pos.getWorld());
+                                    if (loader != null) {
+                                        loader.disableTeleport(fawePlayer);
+                                        if( pos.getWorld() != null) {
+                                            loader.load(pos.getWorld());
+                                        }
                                     }
                                     player.findFreePosition(pos.getPosition(fawePlayer));
                                 }
@@ -190,6 +193,7 @@ public class TeleportUtil {
                     return true;
                 }
             }
+            if (loader != null) loader.disableTeleport(fp);
             TaskManager.IMP.sync(new RunnableVal<Object>() {
                 @Override
                 public void run(Object o) {
@@ -258,6 +262,7 @@ public class TeleportUtil {
                         @Override
                         public void run(Object o) {
                             fawePlayer.setMeta("teleportBack", back);
+                            if (loader != null) loader.disableTeleport(fawePlayer);
                             fawePlayer.getPlayer().findFreePosition(playerTo.getPlayer().getPosition());
                         }
                     });
