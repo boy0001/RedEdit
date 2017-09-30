@@ -79,8 +79,9 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
         {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
-            dos.writeShort(SERVER_CHANNEL.getGroup());
-            dos.writeShort(SERVER_CHANNEL.getServer());
+            System.out.println("Write " + SERVER_CHANNEL.getGroup() + " | " + SERVER_CHANNEL.getServer());
+            dos.writeChar(SERVER_CHANNEL.getGroup());
+            dos.writeChar(SERVER_CHANNEL.getServer());
             dos.writeInt(0);
             dos.writeByte(0);
             dos.writeUTF(RedEdit.imp().getServerName());
@@ -193,8 +194,9 @@ public class RedEditPubSub extends BinaryJedisPubSub implements Network {
 //            InputStream stream = new LZ4InputStream(fbais, message.length);
             InputStream stream = fbais;
             DataInputStream dataStream = new DataInputStream(stream);
-            int group = dataStream.readShort();
-            int server = dataStream.readShort();
+            int group = dataStream.readChar();
+            int server = dataStream.readChar();
+            System.out.println("Message from " + group + " | " + server);
             Channel channel = new Channel(group, server);
             int method = dataStream.readInt();
             if (method == 0) {

@@ -16,7 +16,7 @@ public class Settings extends Config {
     public int SERVER_GROUP = 1;
     @Comment({
             "This server's unique id",
-            " - Must be in the range: [–32768,32767]"
+            " - Must be in the range: [0,65535]"
     })
     public int SERVER_ID = 1;
 

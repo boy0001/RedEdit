@@ -19,11 +19,11 @@ public class Channel {
     }
 
     public int getGroup() {
-        return (id[0] << 8) + id[1];
+        return ((id[0] & 0xFF) << 8) + id[1] & 0xFF;
     }
 
     public int getServer() {
-        return (id[2] << 8) + id[3];
+        return ((id[2] & 0xFF) << 8) + id[3] & 0xFF;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class Channel {
 
     @Override
     public int hashCode() {
-        return (id[0] << 24) + (id[1] << 16) + (id[2] << 8) + (id[3]);
+        return ((id[0] & 0xFF) << 24) + ((id[1] & 0xFF) << 16) + ((id[2] & 0xFF) << 8) + ((id[3] & 0xFF));
     }
 
     public static byte[] getId(int group, int server) {
