@@ -51,6 +51,11 @@ public class Position {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return world + "," + position.getX() + "," + position.getY() + "," + position.getZ() + "//" + server;
+    }
+
     public String getWorld() {
         return world;
     }

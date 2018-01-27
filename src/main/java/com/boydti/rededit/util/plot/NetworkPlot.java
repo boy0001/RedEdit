@@ -55,7 +55,6 @@ public class NetworkPlot extends SinglePlot {
         }
         if (!player.isOnline()) return false;
         Runnable task = () -> {
-            new  Exception().printStackTrace();
             PlotLoader loader = getArea().getPlotLoader();
             String world = getWorldName();
             Server server = loader.getClaimedServer(world);
@@ -84,7 +83,11 @@ public class NetworkPlot extends SinglePlot {
                 loader.teleport(fp, server, this);
             }
         };
-        TaskManager.IMP.taskNow(task, true);
+        if (Fawe.isMainThread()) {
+            TaskManager.IMP.taskNow(task, true);
+        } else {
+            task.run();
+        }
         return true;
     }
 

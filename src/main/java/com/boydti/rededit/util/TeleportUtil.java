@@ -13,11 +13,7 @@ import com.boydti.rededit.listener.Network;
 import com.boydti.rededit.remote.Position;
 import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.Server;
-import com.boydti.rededit.serializer.BooleanSerializer;
-import com.boydti.rededit.serializer.EnumSerializer;
-import com.boydti.rededit.serializer.PositionSerializer;
-import com.boydti.rededit.serializer.StringArraySerializer;
-import com.boydti.rededit.serializer.VoidSerializer;
+import com.boydti.rededit.serializer.*;
 import com.boydti.rededit.util.plot.PlotLoader;
 import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.Vector;
@@ -69,6 +65,7 @@ public class TeleportUtil {
                                 @Override
                                 public void run(Object o) {
                                     player.findFreePosition(pos.getPosition(fawePlayer));
+                                    fawePlayer.sendMessage(M.TELEPORTING.f("(position) " + "(" + pos + ")"));
                                 }
                             });
                         }
@@ -91,7 +88,9 @@ public class TeleportUtil {
                             Player player = fawePlayer.getPlayer();
                             final Position back = new Position(player.getName(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId);
                             fawePlayer.setMeta("teleportBack", back);
-                            player.findFreePosition(fp.getPlayer().getPosition());
+                            WorldVector to = fp.getPlayer().getPosition();
+                            player.findFreePosition(to);
+                            fawePlayer.sendMessage(M.TELEPORTING.f("(player) " + "(" + fp.getName() + ")"));
                         }
                     });
                     return true;

@@ -111,6 +111,8 @@ shadowJar {
         include(dependency('org.apache.commons:commons-pool2:2.4.2'))
         include(dependency(group: 'redis.clients', name: 'jedis', version: '2.9.0'))
     }
+    relocate('org.apache.commons', 'com.boydti.apache.commons')
+    relocate('redis.clients', 'com.boydti.redis.clients')
     archiveName = "${project.name}-${project.version}.jar"
     destinationDir = file 'target'
 }
