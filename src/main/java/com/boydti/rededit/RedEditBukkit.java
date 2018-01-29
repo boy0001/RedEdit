@@ -2,6 +2,7 @@ package com.boydti.rededit;
 
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.util.TaskManager;
+import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.events.PlayerJoinEvent;
 import com.boydti.rededit.events.PlayerQuitEvent;
 import com.boydti.rededit.util.plot.PlotLoader;
@@ -40,19 +41,23 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
         TaskManager.IMP.repeat(new Runnable() {
             @Override
             public void run() {
-                int now = (int) (System.currentTimeMillis() / 1000);
-                Iterator<Map.Entry<UUID, int[]>> iter = views.entrySet().iterator();
-                while (iter.hasNext()) {
-                    Map.Entry<UUID, int[]> entry = iter.next();
-                    int[] value = entry.getValue();
-                    if (now - value[1] > timeout) {
-                        Player player = Bukkit.getPlayer(entry.getKey());
-                        if (player != null) {
-                            setViewDistance(player, Math.max(4, value[0] + 1));
-                        } else {
-                            iter.remove();
+                if (Settings.IMP.DYNAMIC_RENDERING) {
+                    int now = (int) (System.currentTimeMillis() / 1000);
+                    Iterator<Map.Entry<UUID, int[]>> iter = views.entrySet().iterator();
+                    while (iter.hasNext()) {
+                        Map.Entry<UUID, int[]> entry = iter.next();
+                        int[] value = entry.getValue();
+                        if (now - value[1] > timeout) {
+                            Player player = Bukkit.getPlayer(entry.getKey());
+                            if (player != null) {
+                                setViewDistance(player, Math.max(4, value[0] + 1));
+                            } else {
+                                iter.remove();
+                            }
                         }
                     }
+                } else if (!views.isEmpty()) {
+                    views.clear();
                 }
             }
         }, 20);
@@ -109,26 +114,28 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     private Map<UUID, int[]> views = new ConcurrentHashMap<>();
 
     public void setViewDistance(Player player, int value) {
-        UUID uuid = player.getUniqueId();
-        if (value == MAX_DISTANCE) {
-            views.remove(uuid);
-        } else {
-            int[] val = views.get(uuid);
-            if (val == null) {
-                val = new int[] {value, (int) (System.currentTimeMillis() / 1000)};
-                views.put(player.getUniqueId(), val);
+        if (Settings.IMP.DYNAMIC_RENDERING) {
+            UUID uuid = player.getUniqueId();
+            if (value == MAX_DISTANCE) {
+                views.remove(uuid);
             } else {
-                if (value <= val[0]) {
-                    val[1] = (int) (System.currentTimeMillis() / 1000);
-                }
-                if (val[0] == value) {
-                    return;
+                int[] val = views.get(uuid);
+                if (val == null) {
+                    val = new int[]{value, (int) (System.currentTimeMillis() / 1000)};
+                    views.put(player.getUniqueId(), val);
                 } else {
-                    val[0] = value;
+                    if (value <= val[0]) {
+                        val[1] = (int) (System.currentTimeMillis() / 1000);
+                    }
+                    if (val[0] == value) {
+                        return;
+                    } else {
+                        val[0] = value;
+                    }
                 }
             }
+            player.setViewDistance(value);
         }
-        player.setViewDistance(value);
     }
 
     public int getViewDistance(Player player) {
@@ -145,10 +152,12 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     public void onPlayerMove(PlayerMoveEvent event) {
         Location from = event.getFrom();
         Location to = event.getTo();
-        if (from.getBlockX() >> 6 != to.getBlockX() >> OFFSET || from.getBlockZ() >> OFFSET != to.getBlockZ() >> OFFSET) {
-            Player player = event.getPlayer();
-            int currentView = getViewDistance(player);
-            setViewDistance(player, Math.max(currentView - 1, 1));
+        if (Settings.IMP.DYNAMIC_RENDERING) {
+            if (from.getBlockX() >> 6 != to.getBlockX() >> OFFSET || from.getBlockZ() >> OFFSET != to.getBlockZ() >> OFFSET) {
+                Player player = event.getPlayer();
+                int currentView = getViewDistance(player);
+                setViewDistance(player, Math.max(currentView - 1, 1));
+            }
         }
     }
 

@@ -22,6 +22,7 @@ public class Settings extends Config {
 
     public boolean DEBUG = true;
     public boolean PLOTSQUARED_SYNC = true;
+    public boolean DYNAMIC_RENDERING = true;
 
     @Create
     public PATHS PATHS;
