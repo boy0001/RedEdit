@@ -5,11 +5,7 @@ import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.events.PlayerJoinEvent;
 import com.boydti.rededit.events.PlayerQuitEvent;
 import com.boydti.rededit.util.plot.PlotLoader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -45,11 +41,17 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
             @Override
             public void run() {
                 int now = (int) (System.currentTimeMillis() / 1000);
-                for (Map.Entry<UUID, int[]> entry : views.entrySet()) {
+                Iterator<Map.Entry<UUID, int[]>> iter = views.entrySet().iterator();
+                while (iter.hasNext()) {
+                    Map.Entry<UUID, int[]> entry = iter.next();
                     int[] value = entry.getValue();
                     if (now - value[1] > timeout) {
                         Player player = Bukkit.getPlayer(entry.getKey());
-                        setViewDistance(player, Math.max(4, value[0] + 1));
+                        if (player != null) {
+                            setViewDistance(player, Math.max(4, value[0] + 1));
+                        } else {
+                            iter.remove();
+                        }
                     }
                 }
             }
