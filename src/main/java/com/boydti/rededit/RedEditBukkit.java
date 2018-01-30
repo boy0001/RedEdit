@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
@@ -159,6 +160,17 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
                 setViewDistance(player, Math.max(currentView - 1, 1));
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void playerJoinTPTask(org.bukkit.event.player.PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        Location def = Bukkit.getWorlds().get(0).getSpawnLocation();
+        PlayerRespawnEvent spawn = new PlayerRespawnEvent(player, def, false);
+        Bukkit.getServer().getPluginManager().callEvent(spawn);
+        Location loc = spawn.getRespawnLocation();
+        player.teleport(loc);
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
