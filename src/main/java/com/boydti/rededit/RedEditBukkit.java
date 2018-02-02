@@ -164,13 +164,15 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void playerJoinTPTask(org.bukkit.event.player.PlayerJoinEvent event) {
-        Player player = event.getPlayer();
+        if (Settings.IMP.SPAWN_TELEPORT) {
+            Player player = event.getPlayer();
 
-        Location def = Bukkit.getWorlds().get(0).getSpawnLocation();
-        PlayerRespawnEvent spawn = new PlayerRespawnEvent(player, def, false);
-        Bukkit.getServer().getPluginManager().callEvent(spawn);
-        Location loc = spawn.getRespawnLocation();
-        player.teleport(loc);
+            Location def = Bukkit.getWorlds().get(0).getSpawnLocation();
+            PlayerRespawnEvent spawn = new PlayerRespawnEvent(player, def, false);
+            Bukkit.getServer().getPluginManager().callEvent(spawn);
+            Location loc = spawn.getRespawnLocation();
+            player.teleport(loc);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
