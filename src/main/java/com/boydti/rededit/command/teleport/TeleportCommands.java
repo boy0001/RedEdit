@@ -236,7 +236,7 @@ public class TeleportCommands {
     public void group(Player player, int groupId) throws WorldEditException {
         Group group = controller.getGroup(groupId);
         if (group == null) {
-            M.GROUP_NOT_FOUND.send(player);
+            M.GROUP_NOT_FOUND.send(player, groupId);
             return;
         }
         Server server = group.getSmallestServer();
@@ -245,7 +245,7 @@ public class TeleportCommands {
             M.TELEPORTING.send(fp, server.getName());
             server.teleportPlayer(fp);
         } else {
-            M.GROUP_NOT_FOUND.send(player);
+            M.GROUP_NOT_FOUND.send(player, groupId);
             return;
         }
     }
