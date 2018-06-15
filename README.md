@@ -1,14 +1,16 @@
-# RedEdit [Java] [Minecraft]
-The goal of this project is to abstract the network and simplify complex instructions.
+# RedEdit
+The goal of this project is to abstract the network and simplify complex instructions. RedEdit allows for cross server code execution and data synchronization. This allows for new server instances (for load balancing) to be started on an as needed bases, each with the same data set and functionality. All servers within a server group will serve the same function (this can be configured in the config.yml). 
 
-RedEdit allows for cross server code execution
- - Uses Redis for communication
- - Supports Spigot/Bungee network - though can easily be ported to other platforms
- - Objects are serialized and compressed when transmitted
+Redis is used for cross server code execution. This project currently supports Spigot/Bungee network, but can be ported to other platforms. Objects are serialized and compressed when transmitted using LZ4.
+ 
+Misc functionality:
+ - Player tracking / teleporting between nodes / user configs.
+ - Dynamic rendering based on server load
+ - Task scheduling
  
 TODO:
  - Port to sponge/lily
- - Abstract connected players
+ - Fully abstract connected players
  - Scripting support
  
 ## Example
@@ -27,7 +29,7 @@ RemoteCall<Result, Argument> task = new RemoteCall<Result, Argument>() {
         return null;
     }
 // You can set a custom serializer if you want
-// Or it will default to java's object serializer
+// Otherwise it will use the default serializer
 }.setSerializer(some serializer);
 ```
 
@@ -44,6 +46,7 @@ task.call(serverGroup, serverId, arg, new RunnableVal2<Server, String>() {
         // Do something with the result or server?
     }
 });
+// Use `collect` or `any` instead of `call` to pass a result back.
 ```
 Misc classes
 ```Java
