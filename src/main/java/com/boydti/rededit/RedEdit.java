@@ -12,6 +12,10 @@ import com.boydti.rededit.listener.Network;
 import com.boydti.rededit.listener.PlayerListener;
 import com.boydti.rededit.listener.RedEditPubSub;
 import com.boydti.rededit.remote.Channel;
+import com.boydti.rededit.remote.RemoteCall;
+import com.boydti.rededit.remote.Server;
+import com.boydti.rededit.serializer.UUIDSerializer;
+import com.boydti.rededit.serializer.VoidSerializer;
 import com.boydti.rededit.test.BasicTaskMan;
 import com.boydti.rededit.test.NullPlugin;
 import com.boydti.rededit.util.M;
@@ -114,8 +118,24 @@ public class RedEdit {
         return tmp;
     }
 
+    private RemoteCall<Object, UUID> unloadUser = new RemoteCall<Object, UUID>() {
+        @Override
+        public Object run(Server sender, UUID arg) {
+            unloadUser(arg, true);
+            return null;
+        }
+    }.setSerializer(new VoidSerializer(), new UUIDSerializer());
+
     public void unloadWarps() {
         warps = null;
+    }
+
+    public void unloadUser(UUID uuid, boolean local) {
+        if (local) {
+            users.invalidate(uuid);
+        } else {
+            unloadUser.call(0, 0, uuid);
+        }
     }
 
     public UserConf getUserConf(UUID user) {

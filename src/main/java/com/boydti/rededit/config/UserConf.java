@@ -1,13 +1,18 @@
 package com.boydti.rededit.config;
 
+import com.boydti.rededit.RedEdit;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
 public class UserConf extends LocalConfig {
+    private final UUID user;
+
     public UserConf(File folder, UUID user) {
         super(new File(folder, user + ".yml"));
+        this.user = user;
     }
 
     @Create // This value will be generated automatically
@@ -37,5 +42,11 @@ public class UserConf extends LocalConfig {
 
     public void addHome(String name, UserConf.HOMES home) {
         HOMES.put(name, home);
+    }
+
+    @Override
+    public void save() {
+        super.save();
+        RedEdit.get().unloadUser(this.user, false);
     }
 }
