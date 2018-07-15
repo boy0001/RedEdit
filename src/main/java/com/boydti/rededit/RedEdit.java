@@ -63,6 +63,8 @@ public class RedEdit {
     private Jedis JEDIS;
     private PlayerListener playerListener;
 
+    private static RemoteCall<Object, UUID> unloadUser;
+
     private RedEdit(IRedEditPlugin plugin) throws URISyntaxException, IOException {
         if (TaskManager.IMP == null) TaskManager.IMP = new BasicTaskMan(5);
         INSTANCE = this;
@@ -101,6 +103,15 @@ public class RedEdit {
                 close();
             }
         }));
+        if (unloadUser == null) {
+            unloadUser = new RemoteCall<Object, UUID>() {
+                @Override
+                public Object run(Server sender, UUID arg) {
+                    unloadUser(arg, true);
+                    return null;
+                }
+            }.setSerializer(new VoidSerializer(), new UUIDSerializer());
+        }
     }
 
     public static void debug(Object o) {
@@ -117,14 +128,6 @@ public class RedEdit {
         }
         return tmp;
     }
-
-    private RemoteCall<Object, UUID> unloadUser = new RemoteCall<Object, UUID>() {
-        @Override
-        public Object run(Server sender, UUID arg) {
-            unloadUser(arg, true);
-            return null;
-        }
-    }.setSerializer(new VoidSerializer(), new UUIDSerializer());
 
     public void unloadWarps() {
         warps = null;
