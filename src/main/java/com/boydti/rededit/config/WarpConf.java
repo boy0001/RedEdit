@@ -16,6 +16,7 @@ public class WarpConf extends LocalConfig {
     public static class WARP extends ConfigBlock {
         public String WORLD = "world";
         public int SERVER = 0;
+        public int GROUP = Integer.MIN_VALUE;
         public int X = 0;
         public int Y = 0;
         public int Z = 0;

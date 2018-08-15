@@ -12,12 +12,14 @@ public class Position {
     private final Vector position;
     private final Integer server;
     private final String player;
+    private final Integer group;
 
-    public Position(String player, @Nullable String world, @Nullable Vector pos, @Nullable Integer server) {
+    public Position(String player, @Nullable String world, @Nullable Vector pos, @Nullable Integer server, @Nullable Integer group) {
         this.player = player;
         this.world = world;
         this.position = pos;
         this.server = server;
+        this.group = group;
     }
 
     public String getPlayer() {
@@ -53,7 +55,7 @@ public class Position {
 
     @Override
     public String toString() {
-        return world + "," + position.getX() + "," + position.getY() + "," + position.getZ() + "//" + server;
+        return world + "," + position.getX() + "," + position.getY() + "," + position.getZ() + "//" + server + "//" + group;
     }
 
     public String getWorld() {
@@ -67,5 +69,10 @@ public class Position {
     @Nullable
     public Integer getServer() {
         return server;
+    }
+
+    @Nullable
+    public Integer getGroup() {
+        return group;
     }
 }

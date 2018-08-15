@@ -277,10 +277,12 @@ public class TeleportCommands {
         if (home == null) {
             M.HOME_NOT_FOUND.send(fp, StringMan.join(conf.HOMES.getSections(), ", "));
         } else {
-            int server = home.SERVER == 0 ? Settings.IMP.SERVER_ID : home.SERVER;
-            Position pos = new Position(fp.getName(), home.WORLD, new Vector(home.X, home.Y, home.Z), server);
-            M.TELEPORTING.send(fp, name);
-            util.teleport(fp, pos);
+            Position pos = new Position(fp.getName(), home.WORLD, new Vector(home.X, home.Y, home.Z), home.SERVER, home.GROUP);
+            if (util.teleport(fp, pos)) {
+                M.TELEPORTING.send(fp, name);
+            } else {
+                BBC.SELECTOR_INVALID_COORDINATES.send(fp, pos);
+            }
         }
     }
 
@@ -345,6 +347,7 @@ public class TeleportCommands {
         WorldVector pos = player.getPosition();
         home.WORLD = Fawe.imp().getWorldName(pos.getWorld());
         home.SERVER = Settings.IMP.SERVER_ID;
+        home.GROUP = Settings.IMP.SERVER_GROUP;
         home.X = pos.getBlockX();
         home.Y = pos.getBlockY();
         home.Z = pos.getBlockZ();
@@ -376,6 +379,7 @@ public class TeleportCommands {
         WorldVector pos = player.getPosition();
         warp.WORLD = Fawe.imp().getWorldName(pos.getWorld());
         warp.SERVER = Settings.IMP.SERVER_ID;
+        warp.GROUP = Settings.IMP.SERVER_GROUP;
         warp.X = pos.getBlockX();
         warp.Y = pos.getBlockY();
         warp.Z = pos.getBlockZ();
@@ -400,9 +404,12 @@ public class TeleportCommands {
         if (warp == null) {
             M.WARP_NOT_FOUND.send(fp, StringMan.join(conf.WARP.getSections(), ", "));
         } else {
-            Position pos = new Position(fp.getName(), warp.WORLD, new Vector(warp.X, warp.Y, warp.Z), warp.SERVER);
-            M.TELEPORTING.send(fp, name);
-            util.teleport(fp, pos);
+            Position pos = new Position(fp.getName(), warp.WORLD, new Vector(warp.X, warp.Y, warp.Z), warp.SERVER, warp.GROUP);
+            if (util.teleport(fp, pos)) {
+                M.TELEPORTING.send(fp, name);
+            } else {
+                BBC.SELECTOR_INVALID_COORDINATES.send(fp, pos);
+            }
         }
     }
 }

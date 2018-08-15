@@ -21,7 +21,8 @@ public class UserConf extends LocalConfig {
     @Comment({"The user's home locations"})
     @BlockName({}) // The name for the default block
     public static class HOMES extends ConfigBlock {
-        public int SERVER = 0;
+        public int SERVER = Integer.MIN_VALUE;
+        public int GROUP = Integer.MIN_VALUE;
         public String WORLD = "world";
         public double X = 0;
         public double Y = 0;

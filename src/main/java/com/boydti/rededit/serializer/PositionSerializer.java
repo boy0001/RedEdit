@@ -13,6 +13,7 @@ public class PositionSerializer implements Serializer<Position> {
         String world = value.getWorld();
         Vector pos = value.getPosition();
         Integer server = value.getServer();
+        Integer group = value.getGroup();
         dout.writeBoolean(player != null); {
             dout.writeUTF(player);
         }
@@ -30,6 +31,10 @@ public class PositionSerializer implements Serializer<Position> {
         if (server != null) {
             dout.writeShort(server);
         }
+        dout.writeBoolean(group != null);
+        if (group != null) {
+            dout.writeShort(group);
+        }
     }
 
     @Override
@@ -37,6 +42,7 @@ public class PositionSerializer implements Serializer<Position> {
         String world;
         Vector pos;
         Integer server;
+        Integer group;
         String player;
         if (din.readBoolean()) {
             player = din.readUTF();
@@ -58,6 +64,11 @@ public class PositionSerializer implements Serializer<Position> {
         } else {
             server = null;
         }
-        return new Position(player, world, pos, server);
+        if (din.readBoolean()) {
+            group = (int) din.readShort();
+        } else {
+            group = null;
+        }
+        return new Position(player, world, pos, server, group);
     }
 }

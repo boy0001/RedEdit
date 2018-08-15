@@ -10,6 +10,7 @@ import com.boydti.rededit.command.teleport.TPAResponse;
 import com.boydti.rededit.command.teleport.TeleportRequest;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.listener.Network;
+import com.boydti.rededit.remote.Group;
 import com.boydti.rededit.remote.Position;
 import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.Server;
@@ -19,6 +20,8 @@ import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.entity.Player;
+
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -47,13 +50,14 @@ public class TeleportUtil {
             @Override
             public Object run(Server sender, Position pos) {
                 int serverId = sender.getId();
+                int groupId = sender.getChannel().getGroup();
                 if (pos.getPosition() != null) {
                     RedEdit.get().getPlayerListener().addJoinTask(pos.getPlayer(), new RunnableVal<FawePlayer>() {
                         @Override
                         public void run(FawePlayer fawePlayer) {
                             if (loader != null) loader.disableTeleport(fawePlayer);
                             Player player = fawePlayer.getPlayer();
-                            final Position back = new Position(pos.getPlayer(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId);
+                            final Position back = new Position(pos.getPlayer(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId, groupId);
                             fawePlayer.setMeta("teleportBack", back);
                             if (loader != null) {
                                 loader.disableTeleport(fawePlayer);
@@ -79,6 +83,7 @@ public class TeleportUtil {
             @Override
             public Object run(Server sender, String[] arg) {
                 int serverId = sender.getId();
+                int groupId = sender.getChannel().getGroup();
                 FawePlayer<Object> fp = FawePlayer.wrap(arg[1]);
                 if (fp != null) {
                     RedEdit.get().getPlayerListener().addJoinTask(arg[0], new RunnableVal<FawePlayer>() {
@@ -86,7 +91,7 @@ public class TeleportUtil {
                         public void run(FawePlayer fawePlayer) {
                             if (loader != null) loader.disableTeleport(fawePlayer);
                             Player player = fawePlayer.getPlayer();
-                            final Position back = new Position(player.getName(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId);
+                            final Position back = new Position(player.getName(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId, groupId);
                             fawePlayer.setMeta("teleportBack", back);
                             WorldVector to = fp.getPlayer().getPosition();
                             player.findFreePosition(to);
@@ -182,13 +187,13 @@ public class TeleportUtil {
             return true;
         } else if (previous.getPosition() != null) {
             WorldVector pos = fp.getPlayer().getPosition();
-            fp.setMeta("teleportBack", new Position(fp.getName(), Fawe.imp().getWorldName(pos.getWorld()), pos, Settings.IMP.SERVER_ID));
+            fp.setMeta("teleportBack", new Position(fp.getName(), Fawe.imp().getWorldName(pos.getWorld()), pos, Settings.IMP.SERVER_ID, Settings.IMP.SERVER_GROUP));
             String world = previous.getWorld();
             if (world != null && loader != null) {
                 Server server = loader.getLoadedServer(world);
                 if (server != null) {
                     Vector v = previous.getPosition();
-                    teleport(fp, server.getId(), world, v);
+                    teleport(fp, server.getId(), server.getChannel().getGroup(), world, v);
                     return true;
                 }
             }
@@ -208,32 +213,39 @@ public class TeleportUtil {
     }
 
     public boolean teleport(FawePlayer from, Position pos) {
-        return teleport(from, pos.getServer(), pos.getWorld(), pos.getPosition());
+        return teleport(from, pos.getServer(), pos.getGroup(), pos.getWorld(), pos.getPosition());
     }
 
-    public boolean teleport(FawePlayer from, Integer serverId, String world, Vector pos) {
-        if (serverId == null || serverId == 0) {
+    public boolean teleport(FawePlayer from, Integer serverId, Integer groupId, String world, Vector pos) {
+        if (serverId == null || serverId == Integer.MIN_VALUE) {
             serverId = Settings.IMP.SERVER_ID;
         }
 
         Network network = RedEdit.get().getNetwork();
-        Server server = serverId == null || serverId == 0 ? network.getLocalServer() : network.getServer(serverId);
+        Server server = serverId == null || serverId == Integer.MIN_VALUE ? network.getLocalServer() : network.getServer(serverId);
+        groupId = groupId != null && groupId != Integer.MIN_VALUE ? groupId : (server != null ? server.getChannel().getGroup() : null);
         if (loader != null) {
             Server newServer;
-            if (server != null) {
-                newServer = loader.getLoadedServer(world, server.getChannel().getGroup());
+            if (groupId != null) {
+                newServer = loader.getLoadedServer(world, groupId);
             } else {
                 newServer = loader.getLoadedServer(world);
             }
             if (newServer != null) {
                 server = newServer;
                 serverId = newServer.getId();
+            } else if (server == null && groupId != null) {
+                Group group = RedEdit.get().getNetwork().getGroup(groupId);
+                if (group != null) {
+                    Collection<Server> servers = group.getServers();
+                    if (servers != null && !servers.isEmpty()) servers.iterator().next();
+                }
             }
         }
         if (server == null) {
             return false;
         }
-        Position remotePos = new Position(from.getName(), world, pos, serverId);
+        Position remotePos = new Position(from.getName(), world, pos, serverId, groupId);
         addTeleportPositionTask.call(0, serverId, remotePos, null);
         RedEdit.imp().teleport(from, server.getName());
         return true;
@@ -247,10 +259,10 @@ public class TeleportUtil {
         {
             final Position back;
             if (fpFrom != null) {
-                back = new Position(from, Fawe.imp().getWorldName(fpFrom.getWorld()), fpFrom.getPlayer().getPosition(), Settings.IMP.SERVER_ID);
+                back = new Position(from, Fawe.imp().getWorldName(fpFrom.getWorld()), fpFrom.getPlayer().getPosition(), Settings.IMP.SERVER_ID, null);
             } else {
                 Server server = RedEdit.get().getNetwork().getServer(from);
-                back = new Position(from, null, null, server != null ? server.getId() : Settings.IMP.SERVER_ID);
+                back = new Position(from, null, null, server != null ? server.getId() : Settings.IMP.SERVER_ID, null);
             }
             RedEdit.imp().teleportHere(playerTo, from);
             RedEdit.get().getPlayerListener().addJoinTask(from, new RunnableVal<FawePlayer>() {
