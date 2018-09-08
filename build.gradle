@@ -29,7 +29,7 @@ repositories {
     maven {url "https://hub.spigotmc.org/nexus/content/groups/public/"}
     maven {url "https://oss.sonatype.org/content/groups/public/"}
     maven {url "http://maven.sk89q.com/repo/"}
-    maven {url "http://ci.athion.net/job/FastAsyncWorldEdit/ws/mvn/"}
+    maven { url "http://ci.athion.net/job/FAWE-1.13/ws/mvn/" }
     maven {url "http://ci.athion.net/job/PlotSquared/ws/mvn/"}
 }
 
@@ -37,6 +37,7 @@ dependencies {
     compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
     compile name: 'Paper-API'
     compile('com.boydti:fawe-api:latest') { transitive = false }
+    compile('com.boydti:fawe-bukkit:latest') { transitive = false }
 //    compile 'com.plotsquared:plotsquared-api:latest'
 //    compile name: 'FastAsyncWorldEdit'
     compile name: 'PlotSquared'
