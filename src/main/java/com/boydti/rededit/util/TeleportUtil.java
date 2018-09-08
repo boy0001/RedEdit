@@ -238,7 +238,10 @@ public class TeleportUtil {
                 Group group = RedEdit.get().getNetwork().getGroup(groupId);
                 if (group != null) {
                     Collection<Server> servers = group.getServers();
-                    if (servers != null && !servers.isEmpty()) servers.iterator().next();
+                    if (servers != null && !servers.isEmpty()) {
+                        server = servers.iterator().next();
+                        serverId = server.getId();
+                    }
                 }
             }
         }
