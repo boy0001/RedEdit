@@ -36,9 +36,9 @@ repositories {
 dependencies {
     compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
     compile name: 'Paper-API'
-//    compile('com.boydti:fawe-api:latest') { transitive = false }
+    compile('com.boydti:fawe-api:latest') { transitive = false }
 //    compile 'com.plotsquared:plotsquared-api:latest'
-    compile name: 'FastAsyncWorldEdit'
+//    compile name: 'FastAsyncWorldEdit'
     compile name: 'PlotSquared'
     compile name: 'Bukkit-Connect'
     compile(group: 'com.sk89q.worldedit', name: 'worldedit-core', version:'6.1.3-SNAPSHOT') {
