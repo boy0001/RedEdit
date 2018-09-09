@@ -2,9 +2,10 @@ package com.boydti.rededit.remote;
 
 import com.boydti.fawe.FaweAPI;
 import com.boydti.fawe.object.FawePlayer;
-import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.WorldVector;
+import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.world.World;
+
 import javax.annotation.Nullable;
 
 public class Position {
@@ -26,26 +27,26 @@ public class Position {
         return player;
     }
 
-    public WorldVector getPosition(FawePlayer fp) {
+    public Location getPosition(FawePlayer fp) {
         if (position == null) {
-            return fp.getPlayer().getPosition();
+            return fp.getPlayer().getLocation();
         }
         if (world != null) {
-            LocalWorld weWorld = (LocalWorld) FaweAPI.getWorld(world);
+            World weWorld = FaweAPI.getWorld(world);
             if (weWorld != null) {
-                return new WorldVector(weWorld, position);
+                return new Location(weWorld, position);
             }
         }
-        return new WorldVector((LocalWorld) fp.getWorld(), position);
+        return new Location(fp.getWorld(), position);
     }
 
     @Nullable
     public Vector getPosition() {
         if (position != null) {
             if (world != null) {
-                LocalWorld weWorld = (LocalWorld) FaweAPI.getWorld(world);
+                World weWorld = FaweAPI.getWorld(world);
                 if (weWorld != null) {
-                    return new WorldVector(weWorld, position);
+                    return new Location(weWorld, position);
                 }
             }
             return position;
