@@ -29,8 +29,8 @@ repositories {
     maven {url "https://hub.spigotmc.org/nexus/content/groups/public/"}
     maven {url "https://oss.sonatype.org/content/groups/public/"}
     maven {url "http://maven.sk89q.com/repo/"}
-    maven {url "https://ci.athion.net/job/FAWE-1.13/ws/mvn/" }
-    maven {url "https://ci.athion.net/job/PlotSquared/ws/mvn/"}
+    maven {url "https://ci.athion.net/job/FastAsyncWorldEdit/ws/mvn/" }
+    maven {url "https://ci.athion.net/job/PlotSquared-Legacy/ws/mvn/"}
 }
 
 dependencies {
