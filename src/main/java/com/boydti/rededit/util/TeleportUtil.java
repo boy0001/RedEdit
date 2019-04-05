@@ -20,8 +20,6 @@ import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldedit.world.World;
 
 import java.util.Collection;
 import java.util.Map;
@@ -59,7 +57,7 @@ public class TeleportUtil {
                         public void run(FawePlayer fawePlayer) {
                             if (loader != null) loader.disableTeleport(fawePlayer);
                             Player player = fawePlayer.getPlayer();
-                            final Position back = new Position(pos.getPlayer(), Fawe.imp().getWorldName(player.getWorld()), player.getLocation().toVector(), serverId, groupId);
+                            final Position back = new Position(pos.getPlayer(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId, groupId);
                             fawePlayer.setMeta("teleportBack", back);
                             if (loader != null) {
                                 loader.disableTeleport(fawePlayer);
@@ -93,9 +91,9 @@ public class TeleportUtil {
                         public void run(FawePlayer fawePlayer) {
                             if (loader != null) loader.disableTeleport(fawePlayer);
                             Player player = fawePlayer.getPlayer();
-                            final Position back = new Position(player.getName(), Fawe.imp().getWorldName(player.getWorld()), player.getLocation().toVector(), serverId, groupId);
+                            final Position back = new Position(player.getName(), Fawe.imp().getWorldName(player.getWorld()), player.getPosition(), serverId, groupId);
                             fawePlayer.setMeta("teleportBack", back);
-                            Location to = fp.getPlayer().getLocation();
+                            WorldVector to = fp.getPlayer().getPosition();
                             player.findFreePosition(to);
                             fawePlayer.sendMessage(M.TELEPORTING.f("(player) " + "(" + fp.getName() + ")"));
                         }
@@ -188,8 +186,8 @@ public class TeleportUtil {
             }
             return true;
         } else if (previous.getPosition() != null) {
-            Location pos = fp.getPlayer().getLocation();
-            fp.setMeta("teleportBack", new Position(fp.getName(), Fawe.imp().getWorldName((World) pos.getExtent()), pos, Settings.IMP.SERVER_ID, Settings.IMP.SERVER_GROUP));
+            WorldVector pos = fp.getPlayer().getPosition();
+            fp.setMeta("teleportBack", new Position(fp.getName(), Fawe.imp().getWorldName(pos.getWorld()), pos, Settings.IMP.SERVER_ID, Settings.IMP.SERVER_GROUP));
             String world = previous.getWorld();
             if (world != null && loader != null) {
                 Server server = loader.getLoadedServer(world);
@@ -264,7 +262,7 @@ public class TeleportUtil {
         {
             final Position back;
             if (fpFrom != null) {
-                back = new Position(from, Fawe.imp().getWorldName(fpFrom.getWorld()), fpFrom.getPlayer().getLocation().toVector(), Settings.IMP.SERVER_ID, null);
+                back = new Position(from, Fawe.imp().getWorldName(fpFrom.getWorld()), fpFrom.getPlayer().getPosition(), Settings.IMP.SERVER_ID, null);
             } else {
                 Server server = RedEdit.get().getNetwork().getServer(from);
                 back = new Position(from, null, null, server != null ? server.getId() : Settings.IMP.SERVER_ID, null);
@@ -279,7 +277,7 @@ public class TeleportUtil {
                         public void run(Object o) {
                             fawePlayer.setMeta("teleportBack", back);
                             if (loader != null) loader.disableTeleport(fawePlayer);
-                            fawePlayer.getPlayer().findFreePosition(playerTo.getPlayer().getLocation());
+                            fawePlayer.getPlayer().findFreePosition(playerTo.getPlayer().getPosition());
                         }
                     });
                 }

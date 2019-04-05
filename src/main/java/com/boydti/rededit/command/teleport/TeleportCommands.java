@@ -23,9 +23,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.command.parametric.Optional;
-import com.sk89q.worldedit.world.World;
 
 public class TeleportCommands {
 
@@ -346,13 +344,13 @@ public class TeleportCommands {
         }
         UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
         UserConf.HOMES home = new UserConf.HOMES();
-        Location loc = player.getLocation();
-        home.WORLD = Fawe.imp().getWorldName((World) loc.getExtent());
+        WorldVector pos = player.getPosition();
+        home.WORLD = Fawe.imp().getWorldName(pos.getWorld());
         home.SERVER = Settings.IMP.SERVER_ID;
         home.GROUP = Settings.IMP.SERVER_GROUP;
-        home.X = loc.getBlockX();
-        home.Y = loc.getBlockY();
-        home.Z = loc.getBlockZ();
+        home.X = pos.getBlockX();
+        home.Y = pos.getBlockY();
+        home.Z = pos.getBlockZ();
         conf.addHome(name, home);
         conf.save();
         M.HOME_SET.send(fp, name);
@@ -378,8 +376,8 @@ public class TeleportCommands {
             return;
         }
         WarpConf.WARP warp = new WarpConf.WARP();
-        Location pos = player.getLocation();
-        warp.WORLD = Fawe.imp().getWorldName((World) pos.getExtent());
+        WorldVector pos = player.getPosition();
+        warp.WORLD = Fawe.imp().getWorldName(pos.getWorld());
         warp.SERVER = Settings.IMP.SERVER_ID;
         warp.GROUP = Settings.IMP.SERVER_GROUP;
         warp.X = pos.getBlockX();
