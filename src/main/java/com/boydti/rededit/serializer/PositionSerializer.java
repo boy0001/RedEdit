@@ -1,7 +1,8 @@
 package com.boydti.rededit.serializer;
 
 import com.boydti.rededit.remote.Position;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,7 +12,7 @@ public class PositionSerializer implements Serializer<Position> {
     public void write(DataOutputStream dout, Position value) throws IOException {
         String player = value.getPlayer();
         String world = value.getWorld();
-        Vector pos = value.getPosition();
+        Vector3 pos = value.getPosition();
         Integer server = value.getServer();
         Integer group = value.getGroup();
         dout.writeBoolean(player != null); {
@@ -40,7 +41,7 @@ public class PositionSerializer implements Serializer<Position> {
     @Override
     public Position read(DataInputStream din) throws IOException {
         String world;
-        Vector pos;
+        Vector3 pos;
         Integer server;
         Integer group;
         String player;
@@ -55,7 +56,7 @@ public class PositionSerializer implements Serializer<Position> {
             world = null;
         }
         if (din.readBoolean()) {
-            pos = new Vector(din.readDouble(), din.readDouble(), din.readDouble());
+            pos = Vector3.at(din.readDouble(), din.readDouble(), din.readDouble());
         } else {
             pos = null;
         }

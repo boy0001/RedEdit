@@ -19,10 +19,9 @@ import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.TeleportUtil;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.command.parametric.Optional;
 import com.sk89q.worldedit.world.World;
@@ -279,7 +278,7 @@ public class TeleportCommands {
         if (home == null) {
             M.HOME_NOT_FOUND.send(fp, StringMan.join(conf.HOMES.getSections(), ", "));
         } else {
-            Position pos = new Position(fp.getName(), home.WORLD, new Vector(home.X, home.Y, home.Z), home.SERVER, home.GROUP);
+            Position pos = new Position(fp.getName(), home.WORLD, Vector3.at(home.X, home.Y, home.Z), home.SERVER, home.GROUP);
             if (util.teleport(fp, pos)) {
                 M.TELEPORTING.send(fp, name);
             } else {
@@ -406,7 +405,7 @@ public class TeleportCommands {
         if (warp == null) {
             M.WARP_NOT_FOUND.send(fp, StringMan.join(conf.WARP.getSections(), ", "));
         } else {
-            Position pos = new Position(fp.getName(), warp.WORLD, new Vector(warp.X, warp.Y, warp.Z), warp.SERVER, warp.GROUP);
+            Position pos = new Position(fp.getName(), warp.WORLD, Vector3.at(warp.X, warp.Y, warp.Z), warp.SERVER, warp.GROUP);
             if (util.teleport(fp, pos)) {
                 M.TELEPORTING.send(fp, name);
             } else {

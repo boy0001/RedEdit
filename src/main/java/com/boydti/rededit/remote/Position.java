@@ -2,7 +2,8 @@ package com.boydti.rededit.remote;
 
 import com.boydti.fawe.FaweAPI;
 import com.boydti.fawe.object.FawePlayer;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
 
@@ -10,12 +11,12 @@ import javax.annotation.Nullable;
 
 public class Position {
     private final String world;
-    private final Vector position;
+    private final Vector3 position;
     private final Integer server;
     private final String player;
     private final Integer group;
 
-    public Position(String player, @Nullable String world, @Nullable Vector pos, @Nullable Integer server, @Nullable Integer group) {
+    public Position(String player, @Nullable String world, @Nullable Vector3 pos, @Nullable Integer server, @Nullable Integer group) {
         this.player = player;
         this.world = world;
         this.position = pos;
@@ -41,7 +42,7 @@ public class Position {
     }
 
     @Nullable
-    public Vector getPosition() {
+    public Vector3 getPosition() {
         if (position != null) {
             if (world != null) {
                 World weWorld = FaweAPI.getWorld(world);
@@ -63,7 +64,7 @@ public class Position {
         return world;
     }
 
-    public Vector getVector() {
+    public Vector3 getVector() {
         return position;
     }
 

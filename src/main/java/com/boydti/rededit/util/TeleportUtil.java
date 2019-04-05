@@ -17,9 +17,8 @@ import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.serializer.*;
 import com.boydti.rededit.util.plot.PlotLoader;
 import com.google.common.cache.LoadingCache;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
 
@@ -194,7 +193,7 @@ public class TeleportUtil {
             if (world != null && loader != null) {
                 Server server = loader.getLoadedServer(world);
                 if (server != null) {
-                    Vector v = previous.getPosition();
+                    Vector3 v = previous.getPosition();
                     teleport(fp, server.getId(), server.getChannel().getGroup(), world, v);
                     return true;
                 }
@@ -218,7 +217,7 @@ public class TeleportUtil {
         return teleport(from, pos.getServer(), pos.getGroup(), pos.getWorld(), pos.getPosition());
     }
 
-    public boolean teleport(FawePlayer from, Integer serverId, Integer groupId, String world, Vector pos) {
+    public boolean teleport(FawePlayer from, Integer serverId, Integer groupId, String world, Vector3 pos) {
         if (serverId == null || serverId == Integer.MIN_VALUE) {
             serverId = Settings.IMP.SERVER_ID;
         }

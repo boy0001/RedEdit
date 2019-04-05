@@ -15,6 +15,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public enum M {
     PREFIX("&8(&4&lEDIT&8)&r&7", "Info"),
@@ -218,7 +219,7 @@ public enum M {
     }
 
     public M or(M... others) {
-        int index = PseudoRandom.random.nextInt(others.length + 1);
+        int index = ThreadLocalRandom.current().nextInt(others.length + 1);
         return index == 0 ? this : others[index - 1];
     }
 
