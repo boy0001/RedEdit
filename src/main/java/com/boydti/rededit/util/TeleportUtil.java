@@ -52,6 +52,7 @@ public class TeleportUtil {
             public Object run(Server sender, Position pos) {
                 int serverId = sender.getId();
                 int groupId = sender.getChannel().getGroup();
+                System.out.println("position " + pos + " for " + sender);
                 if (pos.getPosition() != null) {
                     RedEdit.get().getPlayerListener().addJoinTask(pos.getPlayer(), new RunnableVal<FawePlayer>() {
                         @Override
@@ -248,6 +249,10 @@ public class TeleportUtil {
         }
         if (server == null) {
             return false;
+        }
+        if (serverId == null) {
+            System.out.println("Invalid server id: " + serverId + " loader: " + loader);
+            serverId = server.getId();
         }
         Position remotePos = new Position(from.getName(), world, pos, serverId, groupId);
         addTeleportPositionTask.call(0, serverId, remotePos, null);

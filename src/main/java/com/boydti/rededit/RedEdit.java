@@ -85,6 +85,7 @@ public class RedEdit {
             try {
                 loader = new PlotLoader();
             } catch (Throwable ignore) {
+                ignore.printStackTrace();
             }
         }
         this.util = new TeleportUtil(loader);
