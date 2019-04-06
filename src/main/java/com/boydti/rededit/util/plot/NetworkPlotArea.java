@@ -1,9 +1,9 @@
 package com.boydti.rededit.util.plot;
 
-import com.intellectualcrafters.plot.object.Plot;
-import com.intellectualcrafters.plot.object.PlotId;
-import com.intellectualcrafters.plot.object.PlotSettings;
-import com.intellectualcrafters.plot.object.worlds.SinglePlotArea;
+import com.github.intellectualsites.plotsquared.plot.object.Plot;
+import com.github.intellectualsites.plotsquared.plot.object.PlotId;
+import com.github.intellectualsites.plotsquared.plot.object.PlotSettings;
+import com.github.intellectualsites.plotsquared.plot.object.worlds.SinglePlotArea;
 
 public class NetworkPlotArea extends SinglePlotArea {
 

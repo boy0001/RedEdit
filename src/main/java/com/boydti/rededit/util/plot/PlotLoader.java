@@ -8,21 +8,22 @@ import com.boydti.rededit.remote.RemoteCall;
 import com.boydti.rededit.remote.ResultCall;
 import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.util.MapUtil;
+import com.github.intellectualsites.plotsquared.plot.PlotSquared;
 import com.google.common.cache.LoadingCache;
-import com.intellectualcrafters.configuration.ConfigurationSection;
-import com.intellectualcrafters.plot.PS;
-import com.intellectualcrafters.plot.database.DBFunc;
-import com.intellectualcrafters.plot.object.Plot;
-import com.intellectualcrafters.plot.object.PlotArea;
-import com.intellectualcrafters.plot.object.PlotId;
-import com.intellectualcrafters.plot.object.PlotPlayer;
-import com.intellectualcrafters.plot.object.worlds.PlotAreaManager;
-import com.intellectualcrafters.plot.object.worlds.SinglePlotArea;
-import com.intellectualcrafters.plot.object.worlds.SinglePlotAreaManager;
-import com.intellectualcrafters.plot.util.WorldUtil;
+import com.github.intellectualsites.plotsquared.configuration.ConfigurationSection;
+import com.github.intellectualsites.plotsquared.plot.database.DBFunc;
+import com.github.intellectualsites.plotsquared.plot.object.Plot;
+import com.github.intellectualsites.plotsquared.plot.object.PlotArea;
+import com.github.intellectualsites.plotsquared.plot.object.PlotId;
+import com.github.intellectualsites.plotsquared.plot.object.PlotPlayer;
+import com.github.intellectualsites.plotsquared.plot.object.worlds.PlotAreaManager;
+import com.github.intellectualsites.plotsquared.plot.object.worlds.SinglePlotArea;
+import com.github.intellectualsites.plotsquared.plot.object.worlds.SinglePlotAreaManager;
+import com.github.intellectualsites.plotsquared.plot.util.WorldUtil;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class PlotLoader {
 
@@ -35,7 +36,7 @@ public class PlotLoader {
     private final LoadingCache<String, Long> claims = MapUtil.getExpiringMap(1000L, TimeUnit.MILLISECONDS);
 
     public PlotLoader() {
-        PS.get();
+        PlotSquared.get();
         this.syncPlot = new RemoteCall<Object, PlotData>() {
             @Override
             public Object run(Server sender, PlotData plot) {
@@ -81,7 +82,7 @@ public class PlotLoader {
                 String world = args[1];
                 String areaId = args[2];
                 String idStr = args[3];
-                PlotArea area = PS.get().getPlotArea(world, areaId);
+                PlotArea area = PlotSquared.get().getPlotArea(world, areaId);
                 if (area != null) {
                     PlotId id = PlotId.fromString(idStr);
                     Plot plot = area.getOwnedPlot(id);
@@ -100,21 +101,21 @@ public class PlotLoader {
                 return null;
             }
         };
-        PlotAreaManager manager = PS.get().getPlotAreaManager();
+        PlotAreaManager manager = PlotSquared.get().getPlotAreaManager();
         if (manager instanceof SinglePlotAreaManager) {
             SinglePlotAreaManager singleManager = (SinglePlotAreaManager) manager;
             SinglePlotArea area = singleManager.getArea();
             NetworkPlotArea newArea = new NetworkPlotArea(this);
             singleManager.setArea(newArea);
-            ConfigurationSection section = PS.get().worlds.getConfigurationSection("worlds.*");
+            ConfigurationSection section = PlotSquared.get().worlds.getConfigurationSection("worlds.*");
             if (section == null) {
-                section = PS.get().worlds.createSection("worlds.*");
+                section = PlotSquared.get().worlds.createSection("worlds.*");
             }
             newArea.saveConfiguration(section);
             newArea.loadDefaultConfiguration(section);
-            area.foreachPlotAbs(new com.intellectualcrafters.plot.object.RunnableVal<Plot>() {
+            area.forEachBasePlot(new Consumer<Plot>() {
                 @Override
-                public void run(Plot plot) {
+                public void accept(Plot plot) {
                     plot.setArea(newArea);
                 }
             });
@@ -138,7 +139,7 @@ public class PlotLoader {
     }
 
     public Server load(String world) {
-        PlotAreaManager manager = PS.get().getPlotAreaManager();
+        PlotAreaManager manager = PlotSquared.get().getPlotAreaManager();
         if (manager instanceof SinglePlotAreaManager) {
             SinglePlotArea area = ((SinglePlotAreaManager) manager).getArea();
             if (area != null) {

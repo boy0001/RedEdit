@@ -1,13 +1,15 @@
 package com.boydti.rededit.util.plot;
 
-import com.intellectualcrafters.plot.database.AbstractDB;
-import com.intellectualcrafters.plot.flag.Flag;
-import com.intellectualcrafters.plot.object.Plot;
-import com.intellectualcrafters.plot.object.PlotArea;
-import com.intellectualcrafters.plot.object.PlotCluster;
-import com.intellectualcrafters.plot.object.PlotId;
-import com.intellectualcrafters.plot.object.RunnableVal;
-import com.intellectualcrafters.plot.object.comment.PlotComment;
+import com.github.intellectualsites.plotsquared.plot.database.AbstractDB;
+import com.github.intellectualsites.plotsquared.plot.flag.Flag;
+import com.github.intellectualsites.plotsquared.plot.object.Plot;
+import com.github.intellectualsites.plotsquared.plot.object.PlotArea;
+import com.github.intellectualsites.plotsquared.plot.object.PlotCluster;
+import com.github.intellectualsites.plotsquared.plot.object.PlotId;
+import com.github.intellectualsites.plotsquared.plot.object.RunnableVal;
+import com.github.intellectualsites.plotsquared.plot.object.comment.PlotComment;
+
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -162,12 +164,6 @@ public class DelegateDB implements AbstractDB {
     }
 
     @Override
-    public void setFlags(PlotCluster plotCluster, HashMap<Flag<?>, Object> hashMap) {
-        db.setFlags(plotCluster, hashMap);
-        // TODO
-    }
-
-    @Override
     public void setClusterName(PlotCluster plotCluster, String s) {
         db.setClusterName(plotCluster, s);
         // TODO
@@ -292,7 +288,7 @@ public class DelegateDB implements AbstractDB {
     }
 
     @Override
-    public void getComments(Plot plot, String s, RunnableVal<List<PlotComment>> runnableVal) {
+    public void getComments(@Nonnull Plot plot, String s, RunnableVal<List<PlotComment>> runnableVal) {
         db.getComments(plot, s, runnableVal);
     }
 

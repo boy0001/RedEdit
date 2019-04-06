@@ -1,13 +1,13 @@
 package com.boydti.rededit.util.plot;
 
 import com.boydti.rededit.RedEdit;
-import com.intellectualcrafters.plot.PS;
-import com.intellectualcrafters.plot.flag.Flag;
-import com.intellectualcrafters.plot.flag.FlagManager;
-import com.intellectualcrafters.plot.object.BlockLoc;
-import com.intellectualcrafters.plot.object.Plot;
-import com.intellectualcrafters.plot.object.PlotArea;
-import com.intellectualcrafters.plot.object.PlotId;
+import com.github.intellectualsites.plotsquared.plot.PlotSquared;
+import com.github.intellectualsites.plotsquared.plot.flag.Flag;
+import com.github.intellectualsites.plotsquared.plot.flag.FlagManager;
+import com.github.intellectualsites.plotsquared.plot.object.BlockLoc;
+import com.github.intellectualsites.plotsquared.plot.object.Plot;
+import com.github.intellectualsites.plotsquared.plot.object.PlotArea;
+import com.github.intellectualsites.plotsquared.plot.object.PlotId;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -94,7 +94,7 @@ public class PlotData implements Serializable {
 
             plot.clearCache();
         } else {
-            PlotArea area = PS.get().getPlotArea(worldName, areaId);
+            PlotArea area = PlotSquared.get().getPlotArea(worldName, areaId);
             if (area != null) {
                 PlotId id = new PlotId(x, y);
                 plot = new Plot(id, owner, trusted, members, denied, alias, pos, null, area, merged, timestamp, temp);
@@ -110,7 +110,7 @@ public class PlotData implements Serializable {
     }
 
     public boolean remove() {
-        PlotArea area = PS.get().getPlotArea(worldName, areaId);
+        PlotArea area = PlotSquared.get().getPlotArea(worldName, areaId);
         PlotId id = new PlotId(x, y);
         if (area != null) {
             Plot plot = area.getPlot(id);
@@ -123,7 +123,7 @@ public class PlotData implements Serializable {
     }
 
     public Plot getPlot() {
-        PlotArea area = PS.get().getPlotArea(worldName, areaId);
+        PlotArea area = PlotSquared.get().getPlotArea(worldName, areaId);
         PlotId id = new PlotId(x, y);
         if (area != null) {
             Plot plot = area.getPlot(id);
@@ -131,9 +131,9 @@ public class PlotData implements Serializable {
                 return plot;
             }
         }
-        for (Plot plot : PS.get().getPlots()) {
+        for (Plot plot : PlotSquared.get().getPlots()) {
             if (plot.temp == temp) {
-                PlotArea newArea = PS.get().getPlotArea(worldName, areaId);
+                PlotArea newArea = PlotSquared.get().getPlotArea(worldName, areaId);
                 Map<PlotId, Plot> plots = newArea.getPlotsRaw();
                 PlotId currentId = plot.getId();
                 if (newArea == area) {

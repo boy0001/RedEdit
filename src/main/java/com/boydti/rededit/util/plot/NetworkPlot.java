@@ -6,17 +6,17 @@ import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.remote.Server;
-import com.intellectualcrafters.plot.config.C;
-import com.intellectualcrafters.plot.flag.Flag;
-import com.intellectualcrafters.plot.generator.GeneratorWrapper;
-import com.intellectualcrafters.plot.object.BlockLoc;
-import com.intellectualcrafters.plot.object.Plot;
-import com.intellectualcrafters.plot.object.PlotArea;
-import com.intellectualcrafters.plot.object.PlotId;
-import com.intellectualcrafters.plot.object.PlotPlayer;
-import com.intellectualcrafters.plot.object.worlds.SinglePlot;
-import com.intellectualcrafters.plot.object.worlds.SingleWorldGenerator;
-import com.intellectualcrafters.plot.util.WorldUtil;
+import com.github.intellectualsites.plotsquared.plot.config.Captions;
+import com.github.intellectualsites.plotsquared.plot.flag.Flag;
+import com.github.intellectualsites.plotsquared.plot.generator.GeneratorWrapper;
+import com.github.intellectualsites.plotsquared.plot.object.BlockLoc;
+import com.github.intellectualsites.plotsquared.plot.object.Plot;
+import com.github.intellectualsites.plotsquared.plot.object.PlotArea;
+import com.github.intellectualsites.plotsquared.plot.object.PlotId;
+import com.github.intellectualsites.plotsquared.plot.object.PlotPlayer;
+import com.github.intellectualsites.plotsquared.plot.object.worlds.SinglePlot;
+import com.github.intellectualsites.plotsquared.plot.object.worlds.SingleWorldGenerator;
+import com.github.intellectualsites.plotsquared.plot.util.WorldUtil;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -62,7 +62,7 @@ public class NetworkPlot extends SinglePlot {
                 server = loader.load(world);
             }
             if (server == null) {
-                player.sendMessage(C.PREFIX + "Failed to load plot, please try again.");
+                player.sendMessage(Captions.PREFIX + "Failed to load plot, please try again.");
                 return;
             }
             final Plot thisPlot = this;
