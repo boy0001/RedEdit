@@ -1,15 +1,16 @@
 # RedEdit
 The goal of this project is to abstract the network and simplify complex instructions. RedEdit allows for cross server code execution and data synchronization. This allows for new server instances (for load balancing) to be started on an as needed bases, each with the same data set and functionality. All servers within a server group will serve the same function (this can be configured in the config.yml). 
 
-Redis is used for cross server code execution. This project currently supports Spigot/Bungee network, but can be ported to other platforms. Objects are serialized and compressed when transmitted using LZ4.
+Redis is used for cross server code execution. This project currently supports Spigot or ~~Sponge~~(wip)  servers running on Bungee or Lilypad network. Objects are serialized and compressed when transmitted using LZ4.
  
 Misc functionality:
  - Player tracking / teleporting between nodes / user configs.
+ - PlotSquared synchronization
  - Dynamic rendering based on server load
  - Task scheduling
  
 TODO:
- - Port to sponge/lily
+ - Port to sponge
  - Fully abstract connected players
  - Scripting support
  
