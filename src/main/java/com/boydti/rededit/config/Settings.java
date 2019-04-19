@@ -20,7 +20,7 @@ public class Settings extends Config {
     })
     public int SERVER_ID = 1;
 
-    public boolean SPAWN_TELEPORT = true;
+    public boolean SPAWN_TELEPORT = false;
     public boolean DEBUG = true;
     public boolean PLOTSQUARED_SYNC = true;
     public boolean DYNAMIC_RENDERING = true;

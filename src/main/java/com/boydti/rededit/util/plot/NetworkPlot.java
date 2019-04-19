@@ -20,6 +20,8 @@ import com.github.intellectualsites.plotsquared.plot.util.WorldUtil;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.function.Supplier;
+
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
@@ -54,7 +56,7 @@ public class NetworkPlot extends SinglePlot {
             return super.teleportPlayer(player);
         }
         if (!player.isOnline()) return false;
-        Runnable task = () -> {
+        Supplier<Boolean> task = () -> {
             PlotLoader loader = getArea().getPlotLoader();
             String world = getWorldName();
             Server server = loader.getClaimedServer(world);
@@ -63,7 +65,7 @@ public class NetworkPlot extends SinglePlot {
             }
             if (server == null) {
                 player.sendMessage(Captions.PREFIX + "Failed to load plot, please try again.");
-                return;
+                return false;
             }
             final Plot thisPlot = this;
             if (server.getId() == Settings.IMP.SERVER_ID) {
@@ -82,11 +84,12 @@ public class NetworkPlot extends SinglePlot {
                 FawePlayer<Object> fp = FawePlayer.wrap(player.getName());
                 loader.teleport(fp, server, this);
             }
+            return true;
         };
         if (Fawe.isMainThread()) {
-            TaskManager.IMP.taskNow(task, true);
+            TaskManager.IMP.taskNow(() -> task.get(), true);
         } else {
-            task.run();
+            return task.get();
         }
         return true;
     }
