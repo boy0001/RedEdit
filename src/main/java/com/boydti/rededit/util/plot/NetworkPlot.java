@@ -2,7 +2,7 @@ package com.boydti.rededit.util.plot;
 
 import com.boydti.fawe.Fawe;
 import com.boydti.fawe.bukkit.wrapper.AsyncWorld;
-import com.boydti.fawe.object.FawePlayer;
+import com.sk89q.worldedit.entity.Player;
 import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.remote.Server;
@@ -81,7 +81,7 @@ public class NetworkPlot extends SinglePlot {
                 }
                 TaskManager.IMP.task(() -> super.teleportPlayer(player));
             } else {
-                FawePlayer<Object> fp = FawePlayer.wrap(player.getName());
+                Player fp = Fawe.imp().wrap(player.getName());
                 loader.teleport(fp, server, this);
             }
             return true;

@@ -1,8 +1,7 @@
 package com.boydti.rededit.remote;
 
 import com.boydti.fawe.FaweAPI;
-import com.boydti.fawe.object.FawePlayer;
-import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
@@ -28,9 +27,9 @@ public class Position {
         return player;
     }
 
-    public Location getPosition(FawePlayer fp) {
+    public Location getPosition(Player fp) {
         if (position == null) {
-            return fp.getPlayer().getLocation();
+            return fp.getLocation();
         }
         if (world != null) {
             World weWorld = FaweAPI.getWorld(world);

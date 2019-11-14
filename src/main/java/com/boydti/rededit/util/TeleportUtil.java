@@ -1,7 +1,8 @@
 package com.boydti.rededit.util;
 
 import com.boydti.fawe.Fawe;
-import com.boydti.fawe.object.FawePlayer;
+import com.boydti.fawe.beta.implementation.queue.QueueHandler;
+import com.sk89q.worldedit.entity.Player;
 import com.boydti.fawe.object.RunnableVal;
 import com.boydti.fawe.object.RunnableVal2;
 import com.boydti.fawe.util.TaskManager;
@@ -17,7 +18,6 @@ import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.serializer.*;
 import com.boydti.rededit.util.plot.PlotLoader;
 import com.google.common.cache.LoadingCache;
-import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
@@ -25,6 +25,8 @@ import com.sk89q.worldedit.world.World;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class TeleportUtil {
 
@@ -39,9 +41,9 @@ public class TeleportUtil {
         this.message = new RemoteCall<Boolean, String[]>() {
             @Override
             public Boolean run(Server sender, String[] arg) {
-                FawePlayer<Object> player = FawePlayer.wrap(arg[0]);
+                Player player = Fawe.imp().wrap(arg[0]);
                 if (player != null) {
-                    player.sendMessage(arg[1]);
+                    player.print(arg[1]);
                 }
                 return null;
             }
@@ -54,24 +56,23 @@ public class TeleportUtil {
                 int groupId = sender.getChannel().getGroup();
                 System.out.println("position " + pos + " for " + sender);
                 if (pos.getPosition() != null) {
-                    RedEdit.get().getPlayerListener().addJoinTask(pos.getPlayer(), new RunnableVal<FawePlayer>() {
+                    RedEdit.get().getPlayerListener().addJoinTask(pos.getPlayer(), new Consumer<Player>() {
                         @Override
-                        public void run(FawePlayer fawePlayer) {
-                            if (loader != null) loader.disableTeleport(fawePlayer);
-                            Player player = fawePlayer.getPlayer();
+                        public void accept(Player player) {
+                            if (loader != null) loader.disableTeleport(player);
                             final Position back = new Position(pos.getPlayer(), Fawe.imp().getWorldName(player.getWorld()), player.getLocation().toVector(), serverId, groupId);
-                            fawePlayer.setMeta("teleportBack", back);
+                            player.setMeta("teleportBack", back);
                             if (loader != null) {
-                                loader.disableTeleport(fawePlayer);
+                                loader.disableTeleport(player);
                                 if( pos.getWorld() != null) {
                                     loader.load(pos.getWorld());
                                 }
                             }
-                            TaskManager.IMP.sync(new RunnableVal<Object>() {
+                            Fawe.get().getQueueHandler().sync(new Runnable() {
                                 @Override
-                                public void run(Object o) {
-                                    player.findFreePosition(pos.getPosition(fawePlayer));
-                                    fawePlayer.sendMessage(M.TELEPORTING.f("(position) " + "(" + pos + ")"));
+                                public void run() {
+                                    player.findFreePosition(pos.getPosition(player));
+                                    player.print(M.TELEPORTING.f("(position) " + "(" + pos + ")"));
                                 }
                             });
                         }
@@ -86,18 +87,17 @@ public class TeleportUtil {
             public Object run(Server sender, String[] arg) {
                 int serverId = sender.getId();
                 int groupId = sender.getChannel().getGroup();
-                FawePlayer<Object> fp = FawePlayer.wrap(arg[1]);
+                Player fp = Fawe.imp().wrap(arg[1]);
                 if (fp != null) {
-                    RedEdit.get().getPlayerListener().addJoinTask(arg[0], new RunnableVal<FawePlayer>() {
+                    RedEdit.get().getPlayerListener().addJoinTask(arg[0], new Consumer<Player>() {
                         @Override
-                        public void run(FawePlayer fawePlayer) {
-                            if (loader != null) loader.disableTeleport(fawePlayer);
-                            Player player = fawePlayer.getPlayer();
+                        public void accept(Player player) {
+                            if (loader != null) loader.disableTeleport(player);
                             final Position back = new Position(player.getName(), Fawe.imp().getWorldName(player.getWorld()), player.getLocation().toVector(), serverId, groupId);
-                            fawePlayer.setMeta("teleportBack", back);
-                            Location to = fp.getPlayer().getLocation();
+                            player.setMeta("teleportBack", back);
+                            Location to = player.getLocation();
                             player.findFreePosition(to);
-                            fawePlayer.sendMessage(M.TELEPORTING.f("(player) " + "(" + fp.getName() + ")"));
+                            player.print(M.TELEPORTING.f("(player) " + "(" + fp.getName() + ")"));
                         }
                     });
                     return true;
@@ -109,7 +109,7 @@ public class TeleportUtil {
         this.tpa = new RemoteCall<TPAResponse, TeleportRequest>() {
             @Override
             public TPAResponse run(Server sender, TeleportRequest request) {
-                FawePlayer player = FawePlayer.wrap(request.receiver);
+                Player player = Fawe.imp().wrap(request.receiver);
                 if (player != null) {
                     if (request.override || player.hasPermission("rededit.tp.disabled")) {
                         if (!addRequest(player, request)) {
@@ -134,7 +134,7 @@ public class TeleportUtil {
         tpa.call(0, 0, request, run);
     }
 
-    public boolean addRequest(FawePlayer fp, TeleportRequest request) {
+    public boolean addRequest(Player fp, TeleportRequest request) {
         synchronized (fp) {
             LoadingCache<String, TeleportRequest> requests = fp.getMeta("teleportRequests");
             if (requests == null) {
@@ -150,7 +150,7 @@ public class TeleportUtil {
         }
     }
 
-    public TeleportRequest getRequest(FawePlayer fp, String player) {
+    public TeleportRequest getRequest(Player fp, String player) {
         LoadingCache<String, TeleportRequest> requests = fp.getMeta("teleportRequests");
         if (player == null || player.isEmpty()) {
             for (Map.Entry<String, TeleportRequest> entry : requests.asMap().entrySet()) {
@@ -161,7 +161,7 @@ public class TeleportUtil {
         return requests.getIfPresent(player.toLowerCase());
     }
 
-    public TeleportRequest removeRequest(FawePlayer fp, String player) {
+    public TeleportRequest removeRequest(Player fp, String player) {
         LoadingCache<String, TeleportRequest> requests = fp.getMeta("teleportRequests");
         if (player == null || player.isEmpty()) {
             TeleportRequest result = null;
@@ -176,7 +176,7 @@ public class TeleportUtil {
         return requests.getIfPresent(player.toLowerCase());
     }
 
-    public boolean back(FawePlayer fp) {
+    public boolean back(Player fp) {
         Position previous = fp.getMeta("teleportBack");
         if (previous == null) {
             return false;
@@ -188,7 +188,7 @@ public class TeleportUtil {
             }
             return true;
         } else if (previous.getPosition() != null) {
-            Location pos = fp.getPlayer().getLocation();
+            Location pos = fp.getLocation();
             fp.setMeta("teleportBack", new Position(fp.getName(), Fawe.imp().getWorldName((World) pos.getExtent()), pos, Settings.IMP.SERVER_ID, Settings.IMP.SERVER_GROUP));
             String world = previous.getWorld();
             if (world != null && loader != null) {
@@ -203,10 +203,10 @@ public class TeleportUtil {
             if (loader != null && previous.getWorld() != null) {
                 loader.load(previous.getWorld());
             }
-            TaskManager.IMP.sync(new RunnableVal<Object>() {
+            Fawe.get().getQueueHandler().sync(new Runnable() {
                 @Override
-                public void run(Object o) {
-                    fp.getPlayer().findFreePosition(previous.getPosition(fp));
+                public void run() {
+                    fp.findFreePosition(previous.getPosition(fp));
                 }
             });
             return true;
@@ -214,11 +214,11 @@ public class TeleportUtil {
         return false;
     }
 
-    public boolean teleport(FawePlayer from, Position pos) {
+    public boolean teleport(Player from, Position pos) {
         return teleport(from, pos.getServer(), pos.getGroup(), pos.getWorld(), pos.getPosition());
     }
 
-    public boolean teleport(FawePlayer from, Integer serverId, Integer groupId, String world, Vector3 pos) {
+    public boolean teleport(Player from, Integer serverId, Integer groupId, String world, Vector3 pos) {
         if (serverId == null || serverId == Integer.MIN_VALUE) {
             serverId = Settings.IMP.SERVER_ID;
         }
@@ -260,30 +260,30 @@ public class TeleportUtil {
         return true;
     }
 
-    public void teleport(String from, FawePlayer playerTo) {
-        FawePlayer fpFrom = FawePlayer.wrap(from);
+    public void teleport(String from, Player playerTo) {
+        Player fpFrom = Fawe.imp().wrap(from);
 //        if (fpFrom != null) {
 //            fpFrom.getPlayer().setPosition(playerTo.getPlayer().getPosition());
 //        } else
         {
             final Position back;
             if (fpFrom != null) {
-                back = new Position(from, Fawe.imp().getWorldName(fpFrom.getWorld()), fpFrom.getPlayer().getLocation().toVector(), Settings.IMP.SERVER_ID, null);
+                back = new Position(from, Fawe.imp().getWorldName(fpFrom.getWorld()), fpFrom.getLocation().toVector(), Settings.IMP.SERVER_ID, null);
             } else {
                 Server server = RedEdit.get().getNetwork().getServer(from);
                 back = new Position(from, null, null, server != null ? server.getId() : Settings.IMP.SERVER_ID, null);
             }
             RedEdit.imp().teleportHere(playerTo, from);
-            RedEdit.get().getPlayerListener().addJoinTask(from, new RunnableVal<FawePlayer>() {
+            RedEdit.get().getPlayerListener().addJoinTask(from, new Consumer<Player>() {
                 @Override
-                public void run(FawePlayer fawePlayer) {
-                    if (loader != null) loader.disableTeleport(fawePlayer);
-                    TaskManager.IMP.sync(new RunnableVal<Object>() {
+                public void accept(Player player) {
+                    if (loader != null) loader.disableTeleport(player);
+                    Fawe.get().getQueueHandler().sync(new Runnable() {
                         @Override
-                        public void run(Object o) {
-                            fawePlayer.setMeta("teleportBack", back);
-                            if (loader != null) loader.disableTeleport(fawePlayer);
-                            fawePlayer.getPlayer().findFreePosition(playerTo.getPlayer().getLocation());
+                        public void run() {
+                            player.setMeta("teleportBack", back);
+                            if (loader != null) loader.disableTeleport(player);
+                            player.findFreePosition(playerTo.getLocation());
                         }
                     });
                 }
@@ -291,22 +291,21 @@ public class TeleportUtil {
         }
     }
 
-    public void teleport(FawePlayer from, String playerTo) {
-        Player playerFrom = from.getPlayer();
-        FawePlayer fpTo = FawePlayer.wrap(playerTo);
+    public void teleport(Player playerFrom, String playerTo) {
+        Player fpTo = Fawe.imp().wrap(playerTo);
 //        if (fpTo != null) {
 //            Player wePlrTo = fpTo.getPlayer();
 //            wePlrTo.setPosition(playerFrom.getPosition());
 //        } else
         {
-            String playerFromName = from.getName();
+            String playerFromName = playerFrom.getName();
             addTeleportPlayerTask.call(0, 0, new String[]{ playerFromName, playerTo }, new RunnableVal2<Server, Object>() {
                 @Override
                 public void run(Server server, Object o) {
-                    TaskManager.IMP.sync(new RunnableVal<Object>() {
+                    Fawe.get().getQueueHandler().sync(new Runnable() {
                         @Override
-                        public void run(Object o) {
-                            RedEdit.imp().teleport(from, server.getName());
+                        public void run() {
+                            RedEdit.imp().teleport(playerFrom, server.getName());
                         }
                     });
                 }

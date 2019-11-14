@@ -1,6 +1,6 @@
 package com.boydti.rededit;
 
-import com.boydti.fawe.object.FawePlayer;
+import com.sk89q.worldedit.entity.Player;
 import lilypad.client.connect.api.Connect;
 import lilypad.client.connect.api.request.impl.RedirectRequest;
 import lilypad.client.connect.api.result.FutureResultListener;
@@ -19,7 +19,7 @@ public class RedEditLily implements IRedEditPlugin {
     }
 
     @Override
-    public void teleport(FawePlayer fp, String server) {
+    public void teleport(Player fp, String server) {
         if (server.equals(this.getServerName())) {
             return;
         }
@@ -30,16 +30,16 @@ public class RedEditLily implements IRedEditPlugin {
                     if (redirectResult.getStatusCode() == StatusCode.SUCCESS) {
                         return;
                     }
-                    fp.sendMessage("Could not connect");
+                    fp.print("Could not connect");
                 }
             });
         } catch (final Exception exception) {
-            fp.sendMessage("Could not connect");
+            fp.print("Could not connect");
         }
     }
 
     @Override
-    public void teleportHere(FawePlayer desination, String otherPlayer) {
+    public void teleportHere(Player desination, String otherPlayer) {
         try {
             this.connect.request(new RedirectRequest(server, otherPlayer)).registerListener(new FutureResultListener<RedirectResult>() {
                 @Override

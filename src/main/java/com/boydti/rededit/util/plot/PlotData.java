@@ -46,11 +46,11 @@ public class PlotData implements Serializable {
         this.merged = plot.getSettings().merged;
         this.alias = plot.getSettings().alias;
         BlockLoc pos = plot.getSettings().getPosition();
-        this.px = pos.x;
-        this.py = pos.y;
-        this.pz = pos.z;
-        this.yaw = pos.yaw;
-        this.pitch = pos.pitch;
+        this.px = pos.getX();
+        this.py = pos.getY();
+        this.pz = pos.getZ();
+        this.yaw = pos.getYaw();
+        this.pitch = pos.getPitch();
         this.flags = new HashMap<>();
         for (Map.Entry<Flag<?>, Object> entry : plot.getSettings().flags.entrySet()) {
             Flag<?> flag = entry.getKey();

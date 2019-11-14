@@ -1,6 +1,7 @@
 package com.boydti.rededit.listener;
 
-import com.boydti.fawe.object.FawePlayer;
+import com.boydti.fawe.Fawe;
+import com.sk89q.worldedit.entity.Player;
 import com.boydti.fawe.object.RunnableVal;
 import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.config.Settings;
@@ -19,13 +20,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class PlayerListener {
 
-    private final LoadingCache<String, List<RunnableVal<FawePlayer>>> joinTasks;
+    private final LoadingCache<String, List<Consumer<Player>>> joinTasks;
     private final RemoteCall<Object, String[]> joinPacket;
     private final RemoteCall<Object, String[]> quitPacket;
     private final Network sub;
@@ -50,13 +52,13 @@ public class PlayerListener {
         }.setSerializer(new VoidSerializer(), new StringArraySerializer());
     }
 
-    public void addJoinTask(String playerName, RunnableVal<FawePlayer> task) {
+    public void addJoinTask(String playerName, Consumer<Player> task) {
         checkNotNull(task);
-        FawePlayer player;
+        Player player;
         synchronized (joinTasks) {
-            player = FawePlayer.wrap(playerName);
+            player = Fawe.imp().wrap(playerName);
             if (player == null) {
-                List<RunnableVal<FawePlayer>> tasks = joinTasks.getIfPresent(playerName);
+                List<Consumer<Player>> tasks = joinTasks.getIfPresent(playerName);
                 if (tasks == null) {
                     tasks = new ArrayList<>();
                 }
@@ -65,7 +67,7 @@ public class PlayerListener {
                 return;
             }
         }
-        task.run(player);
+        task.accept(player);
     }
 
     @Subscribe
@@ -82,10 +84,10 @@ public class PlayerListener {
 
     @Subscribe
     public void onPlayerJoin(PlayerJoinEvent event) {
-        FawePlayer player = event.getPlayer();
+        Player player = event.getPlayer();
         String name = player.getName();
         joinPacket.call(0, 0, new String[] { name });
-        List<RunnableVal<FawePlayer>> tasks;
+        List<Consumer<Player>> tasks;
         synchronized (joinTasks) {
             tasks = joinTasks.getIfPresent(name);
             if (tasks == null) {
@@ -93,9 +95,9 @@ public class PlayerListener {
             }
             joinTasks.invalidate(name);
         }
-        for (RunnableVal<FawePlayer> task : tasks) {
+        for (Consumer<Player> task : tasks) {
             try {
-                task.run(player);
+                task.accept(player);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
@@ -104,7 +106,7 @@ public class PlayerListener {
 
     @Subscribe
     public void onPlayerQuit(PlayerQuitEvent event) {
-        FawePlayer fp = event.getPlayer();
+        Player fp = event.getPlayer();
         String name = fp.getName();
         quitPacket.call(0, 0, new String[] { name });
         // TODO?

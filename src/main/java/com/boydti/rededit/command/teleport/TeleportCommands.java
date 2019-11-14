@@ -2,7 +2,7 @@ package com.boydti.rededit.command.teleport;
 
 import com.boydti.fawe.Fawe;
 import com.boydti.fawe.config.BBC;
-import com.boydti.fawe.object.FawePlayer;
+import com.sk89q.worldedit.entity.Player;
 import com.boydti.fawe.object.RunnableVal2;
 import com.boydti.fawe.util.StringMan;
 import com.boydti.rededit.RedEdit;
@@ -17,14 +17,19 @@ import com.boydti.rededit.remote.Server;
 import com.boydti.rededit.serializer.VoidSerializer;
 import com.boydti.rededit.util.M;
 import com.boydti.rededit.util.TeleportUtil;
-import com.sk89q.minecraft.util.commands.Command;
-import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldedit.util.command.parametric.Optional;
 import com.sk89q.worldedit.world.World;
+
+import org.enginehub.piston.annotation.Command;
+import org.enginehub.piston.annotation.CommandContainer;
+import org.enginehub.piston.annotation.param.Arg;
+import org.enginehub.piston.annotation.param.ArgFlag;
+import org.enginehub.piston.annotation.param.Switch;
+import org.enginehub.piston.inject.InjectedValueAccess;
+import com.sk89q.minecraft.util.commands.CommandPermissions;
 
 public class TeleportCommands {
 
@@ -46,15 +51,12 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/tptoggle" },
-            usage = "[player]",
-            desc = "Toggle teleport requests",
-            min = 0,
-            max = 0
+            name = "/tptoggle",
+            desc = "Toggle teleport requests"
     )
     @CommandPermissions("rededit.tptoggle")
     public void tptoggle(Player player) throws WorldEditException {
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
 //        if (other != null) {
 //            M.TOGGLE_TELEPORT_SPECIFIC.send(fp, other, fp.toggle("rededit.tp.disabled." + other));
 //        } else {
@@ -63,20 +65,17 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/tpa" },
-            usage = "<player>",
-            desc = "Send a teleport request to a player",
-            min = 1,
-            max = 1
+            name =  "/tpa" ,
+            desc = "Send a teleport request to a player"
     )
     @CommandPermissions("rededit.tpa")
-    public void tpa(Player player, String other) throws WorldEditException {
+    public void tpa(Player player, @Arg(desc = "Player name") String other) throws WorldEditException {
         if (!controller.isOnline(other)) {
             player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
             return;
         }
         TeleportRequest request = new TeleportRequest(player.getName(), other, true, player.hasPermission("rededit.tp.override"));
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         util.tpa(request, new RunnableVal2<Server, TPAResponse>() {
             @Override
             public void run(Server server, TPAResponse response) {
@@ -96,20 +95,17 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/tpahere" },
-            usage = "<player>",
-            desc = "Send a teleport request to a player",
-            min = 1,
-            max = 1
+            name = "/tpahere",
+            desc = "Send a teleport request to a player"
     )
     @CommandPermissions("rededit.tpahere")
-    public void tpahere(Player player, String other) throws WorldEditException {
+    public void tpahere(Player player, @Arg(desc = "Player name") String other) throws WorldEditException {
         if (!controller.isOnline(other)) {
             player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
             return;
         }
         TeleportRequest request = new TeleportRequest(player.getName(), other, false, player.hasPermission("rededit.tp.override"));
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         util.tpa(request, new RunnableVal2<Server, TPAResponse>() {
             @Override
             public void run(Server server, TPAResponse response) {
@@ -129,15 +125,12 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/tpdeny" },
-            usage = "[player]",
-            desc = "Reject a teleport request",
-            min = 0,
-            max = 1
+            name = "/tpdeny",
+            desc = "Reject a teleport request"
     )
     @CommandPermissions("rededit.tpdeny")
-    public void tpdeny(Player player, @Optional("") String other) throws WorldEditException {
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+    public void tpdeny(Player player, @Arg(desc = "Player name", def="") String other) throws WorldEditException {
+        Player fp = Fawe.imp().wrap(player);
         TeleportRequest request = util.removeRequest(fp, other);
         if (request == null) {
             M.NO_REQUEST_FOUND.send(fp);
@@ -147,15 +140,12 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/tpaccept" },
-            usage = "[player]",
-            desc = "Accept a teleport request",
-            min = 0,
-            max = 1
+            name = "/tpaccept",
+            desc = "Accept a teleport request"
     )
     @CommandPermissions("rededit.tpaccept")
-    public void tpaccept(Player player, @Optional("") String other) throws WorldEditException {
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+    public void tpaccept(Player player, @Arg(desc = "Player name") String other) throws WorldEditException {
+        Player fp = Fawe.imp().wrap(player);
         TeleportRequest request = util.removeRequest(fp, other);
         if (request == null) {
             M.NO_REQUEST_FOUND.send(fp);
@@ -176,11 +166,8 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/tp" },
-            usage = "[player]",
-            desc = "Accept a teleport request",
-            min = 0,
-            max = 1
+            name = "/tp",
+            desc = "Accept a teleport request"
     )
     @CommandPermissions("rededit.tp")
     public void tp(Player player, String other) throws WorldEditException {
@@ -188,17 +175,14 @@ public class TeleportCommands {
             player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
             return;
         }
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         M.TELEPORTING.send(fp, other);
         util.teleport(fp, other);
     }
 
     @Command(
-            aliases = { "/tphere" },
-            usage = "[player]",
-            desc = "Accept a teleport request",
-            min = 0,
-            max = 1
+            name = "/tphere",
+            desc = "Accept a teleport request"
     )
     @CommandPermissions("rededit.tphere")
     public void tphere(Player player, String other) throws WorldEditException {
@@ -206,20 +190,18 @@ public class TeleportCommands {
             player.print(M.getPrefix() + BBC.PLAYER_NOT_FOUND.format(other));
             return;
         }
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         M.TELEPORTING.send(fp, other);
         util.teleport(other, fp);
     }
 
     @Command(
-            aliases = { "/back" },
-            desc = "Teleport to your previous location",
-            min = 0,
-            max = 0
+            name = "/back",
+            desc = "Teleport to your previous location"
     )
     @CommandPermissions("rededit.back")
     public void back(Player player) throws WorldEditException {
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         if (!util.back(fp)) {
             M.NO_BACK.send(fp);
         } else {
@@ -228,10 +210,9 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/tpgroup", "/tpg", "/teleportgroup" },
-            desc = "Teleport to a random server in a group",
-            min = 1,
-            max = 1
+            name = "/tpgroup",
+            aliases = { "/tpg", "/teleportgroup" },
+            desc = "Teleport to a random server in a group"
     )
     @CommandPermissions("rededit.back")
     public void group(Player player, int groupId) throws WorldEditException {
@@ -242,7 +223,7 @@ public class TeleportCommands {
         }
         Server server = group.getSmallestServer();
         if (server != null) {
-            FawePlayer<Object> fp = FawePlayer.wrap(player);
+            Player fp = Fawe.imp().wrap(player);
             M.TELEPORTING.send(fp, server.getName());
             server.teleportPlayer(fp);
         } else {
@@ -252,7 +233,7 @@ public class TeleportCommands {
     }
 
 //    @Command(
-//            aliases = { "/tppos" },
+//            name = "/tppos",
 //            usage = "[position]",
 //            desc = "Accept a teleport request",
 //            min = 0,
@@ -264,15 +245,12 @@ public class TeleportCommands {
 //    }
 
     @Command(
-            aliases = { "/home" },
-            usage = "[home]",
-            desc = "Teleport to your home",
-            min = 1,
-            max = 1
+            name = "/home",
+            desc = "Teleport to your home"
     )
     @CommandPermissions("rededit.home")
     public void home(Player player, String name) throws WorldEditException {
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
         UserConf.HOMES home = conf.getHome(name);
         if (home == null) {
@@ -288,15 +266,12 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/delhome" },
-            usage = "[home]",
-            desc = "Delete your home",
-            min = 1,
-            max = 1
+            name = "/delhome",
+            desc = "Delete your home"
     )
     @CommandPermissions("rededit.delhome")
     public void delhome(Player player, String name) throws WorldEditException {
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         UserConf conf = RedEdit.get().getUserConf(player.getUniqueId());
         UserConf.HOMES home = conf.getHome(name);
         if (home == null) {
@@ -309,15 +284,12 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/delwarp" },
-            usage = "[warp]",
-            desc = "Delete a warp",
-            min = 1,
-            max = 1
+            name = "/delwarp",
+            desc = "Delete a warp"
     )
     @CommandPermissions("rededit.delwarp")
     public void delwarp(Player player, String name) throws WorldEditException {
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         WarpConf warps = RedEdit.get().getWarpConfig();
         WarpConf.WARP warp = warps.getWarp(name);
         if (warp == null) {
@@ -330,15 +302,12 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/sethome" },
-            usage = "[home]",
-            desc = "Set your home location",
-            min = 1,
-            max = 1
+            name = "/sethome",
+            desc = "Set your home location"
     )
     @CommandPermissions("rededit.sethome")
     public void sethome(Player player, String name) throws WorldEditException {
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         if (!StringMan.isAlphanumericUnd(name)) {
             M.NOT_ALPHANUMERIC.send(fp, name);
             return;
@@ -358,15 +327,12 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/setwarp" },
-            usage = "[warpname]",
-            desc = "Add a warp",
-            min = 1,
-            max = 1
+            name = "/setwarp",
+            desc = "Add a warp"
     )
     @CommandPermissions("rededit.setwarp")
     public void setwarp(Player player, String name) throws WorldEditException {
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         if (!StringMan.isAlphanumericUnd(name)) {
             M.NOT_ALPHANUMERIC.send(fp, name);
             return;
@@ -391,15 +357,12 @@ public class TeleportCommands {
     }
 
     @Command(
-            aliases = { "/warp" },
-            usage = "[warp]",
-            desc = "Warp to a location",
-            min = 1,
-            max = 1
+            name = "/warp",
+            desc = "Warp to a location"
     )
     @CommandPermissions("rededit.warp")
     public void warp(Player player, String name) throws WorldEditException {
-        FawePlayer<Object> fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         WarpConf conf = RedEdit.get().getWarpConfig();
         WarpConf.WARP warp = conf.getWarp(name);
         if (warp == null) {

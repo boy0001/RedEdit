@@ -23,7 +23,6 @@ import com.boydti.rededit.util.MapUtil;
 import com.boydti.rededit.util.TeleportUtil;
 import com.boydti.rededit.util.plot.PlotLoader;
 import com.google.common.cache.LoadingCache;
-import com.sk89q.worldedit.extension.platform.CommandManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -32,6 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import org.enginehub.piston.CommandManager;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -236,8 +237,9 @@ public class RedEdit {
     }
 
     private void setupCommands() {
-        CommandManager.getInstance().registerCommands(new TeleportCommands(util, getNetwork()));
-        CommandManager.getInstance().registerCommands(new RedEditCommand(), "rededit");
+        System.out.println("TODO setup commands");
+//        CommandManager.getInstance().registerCommands(new TeleportCommands(util, getNetwork()));
+//        CommandManager.getInstance().registerCommands(new RedEditCommand(), "rededit");
     }
 
     private void setupEvents() {

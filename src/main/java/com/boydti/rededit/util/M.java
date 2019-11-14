@@ -2,7 +2,7 @@ package com.boydti.rededit.util;
 
 import com.boydti.fawe.configuration.MemorySection;
 import com.boydti.fawe.configuration.file.YamlConfiguration;
-import com.boydti.fawe.object.FawePlayer;
+import com.sk89q.worldedit.entity.Player;
 import com.boydti.fawe.object.PseudoRandom;
 import com.boydti.fawe.object.RunnableVal3;
 import com.boydti.fawe.util.MainUtil;
@@ -248,7 +248,7 @@ public enum M {
         }
     }
 
-    public void send(final FawePlayer<?> player, final Object... args) {
+    public void send(final Player<?> player, final Object... args) {
         if (isEmpty()) {
             return;
         }

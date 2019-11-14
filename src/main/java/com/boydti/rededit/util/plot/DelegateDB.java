@@ -110,7 +110,7 @@ public class DelegateDB implements AbstractDB {
     }
 
     @Override
-    public void getPersistentMeta(UUID uuid, RunnableVal<Map<String, byte[]>> runnableVal) {
+    public void getPersistentMeta(UUID uuid, Consumer<Map<String, byte[]>> runnableVal) {
         db.getPersistentMeta(uuid, runnableVal);
     }
 
@@ -288,7 +288,7 @@ public class DelegateDB implements AbstractDB {
     }
 
     @Override
-    public void getComments(@Nonnull Plot plot, String s, RunnableVal<List<PlotComment>> runnableVal) {
+    public void getComments(@Nonnull Plot plot, String s, Consumer<List<PlotComment>> runnableVal) {
         db.getComments(plot, s, runnableVal);
     }
 

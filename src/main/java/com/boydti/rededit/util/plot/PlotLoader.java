@@ -1,6 +1,6 @@
 package com.boydti.rededit.util.plot;
 
-import com.boydti.fawe.object.FawePlayer;
+import com.sk89q.worldedit.entity.Player;
 import com.boydti.fawe.object.RunnableVal;
 import com.boydti.rededit.RedEdit;
 import com.boydti.rededit.config.Settings;
@@ -87,11 +87,11 @@ public class PlotLoader {
                     PlotId id = PlotId.fromString(idStr);
                     Plot plot = area.getOwnedPlot(id);
                     if (plot != null) {
-                        RedEdit.get().getPlayerListener().addJoinTask(player, new RunnableVal<FawePlayer>() {
+                        RedEdit.get().getPlayerListener().addJoinTask(player, new Consumer<Player>() {
                             @Override
-                            public void run(FawePlayer fawePlayer) {
-                                disableTeleport(fawePlayer);
-                                PlotPlayer pp = PlotPlayer.wrap(fawePlayer.getName());
+                            public void accept(Player player) {
+                                disableTeleport(player);
+                                PlotPlayer pp = PlotPlayer.wrap(player.getName());
                                 plot.teleportPlayer(pp);
                             }
                         });
@@ -127,7 +127,7 @@ public class PlotLoader {
         claims.put(world, System.nanoTime());
     }
 
-    public void teleport(FawePlayer fp, Server server, Plot plot) {
+    public void teleport(Player fp, Server server, Plot plot) {
         if (server != null && server.getId() != Settings.IMP.SERVER_ID) {
             RedEdit.imp().teleport(fp, server.getName());
             // player, world, areaid, idString
@@ -234,7 +234,7 @@ public class PlotLoader {
         return loaded != null && loaded.getValue();
     }
 
-    public void disableTeleport(FawePlayer fp) {
+    public void disableTeleport(Player fp) {
         PlotPlayer.wrap(fp.getName()).setMeta("teleportOnLogin", false);
     }
 

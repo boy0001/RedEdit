@@ -40,7 +40,7 @@ public class BasicTaskMan extends TaskManager {
                 try {
                     r.run();
                 } catch (Throwable e) {
-                    MainUtil.handleError(e);
+                    e.printStackTrace();
                 }
                 later(this, interval);
             }
@@ -64,7 +64,7 @@ public class BasicTaskMan extends TaskManager {
                 try {
                     r.run();
                 } catch (Throwable e) {
-                    MainUtil.handleError(e);
+                    e.printStackTrace();
                 }
                 laterAsync(this, interval);
             }
@@ -101,7 +101,7 @@ public class BasicTaskMan extends TaskManager {
                     try {
                         r.run();
                     } catch (Throwable e) {
-                        MainUtil.handleError(e);
+                        e.printStackTrace();
                     }
                     return;
                 }
@@ -123,7 +123,7 @@ public class BasicTaskMan extends TaskManager {
                     try {
                         async(r);
                     } catch (Throwable e) {
-                        MainUtil.handleError(e);
+                        e.printStackTrace();
                     }
                     return;
                 }

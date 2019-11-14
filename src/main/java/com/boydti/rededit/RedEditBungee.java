@@ -1,7 +1,7 @@
 package com.boydti.rededit;
 
 import com.boydti.fawe.bukkit.BukkitPlayer;
-import com.boydti.fawe.object.FawePlayer;
+import com.sk89q.worldedit.entity.Player;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import org.bukkit.Bukkit;
@@ -22,7 +22,7 @@ public class RedEditBungee implements IRedEditPlugin {
     }
 
     @Override
-    public void teleport(FawePlayer fp, String server) {
+    public void teleport(Player fp, String server) {
         if (server.equals(getServerName())) {
             return;
         }
@@ -34,7 +34,7 @@ public class RedEditBungee implements IRedEditPlugin {
     }
 
     @Override
-    public void teleportHere(FawePlayer fp, String otherPlayer) {
+    public void teleportHere(Player fp, String otherPlayer) {
         Player other = Bukkit.getPlayer(otherPlayer);
         if (other != null) {
             return;

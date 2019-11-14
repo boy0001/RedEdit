@@ -1,6 +1,7 @@
 package com.boydti.rededit;
 
-import com.boydti.fawe.object.FawePlayer;
+import com.boydti.fawe.Fawe;
+import com.sk89q.worldedit.entity.Player;
 import com.boydti.fawe.util.TaskManager;
 import com.boydti.rededit.config.Settings;
 import com.boydti.rededit.events.PlayerJoinEvent;
@@ -10,7 +11,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -20,6 +20,8 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listener {
 
@@ -49,7 +51,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
                         Map.Entry<UUID, int[]> entry = iter.next();
                         int[] value = entry.getValue();
                         if (now - value[1] > timeout) {
-                            Player player = Bukkit.getPlayer(entry.getKey());
+                            org.bukkit.entity.Player player = Bukkit.getPlayer(entry.getKey());
                             if (player != null) {
                                 setViewDistance(player, Math.max(4, value[0] + 1));
                             } else {
@@ -75,12 +77,12 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     }
 
     @Override
-    public void teleport(FawePlayer fp, String server) {
+    public void teleport(com.sk89q.worldedit.entity.Player fp, String server) {
         imp.teleport(fp, server);
     }
 
     @Override
-    public void teleportHere(FawePlayer fp, String otherPlayer) {
+    public void teleportHere(Player fp, String otherPlayer) {
         imp.teleportHere(fp, otherPlayer);
     }
 
@@ -114,7 +116,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
 
     private Map<UUID, int[]> views = new ConcurrentHashMap<>();
 
-    public void setViewDistance(Player player, int value) {
+    public void setViewDistance(org.bukkit.entity.Player player, int value) {
         if (Settings.IMP.DYNAMIC_RENDERING) {
             UUID uuid = player.getUniqueId();
             if (value == MAX_DISTANCE) {
@@ -139,7 +141,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
         }
     }
 
-    public int getViewDistance(Player player) {
+    public int getViewDistance(org.bukkit.entity.Player player) {
         int[] value = views.get(player.getUniqueId());
         return value == null ? MAX_DISTANCE : value[0];
     }
@@ -155,7 +157,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
         Location to = event.getTo();
         if (Settings.IMP.DYNAMIC_RENDERING) {
             if (from.getBlockX() >> 6 != to.getBlockX() >> OFFSET || from.getBlockZ() >> OFFSET != to.getBlockZ() >> OFFSET) {
-                Player player = event.getPlayer();
+                org.bukkit.entity.Player player = event.getPlayer();
                 int currentView = getViewDistance(player);
                 setViewDistance(player, Math.max(currentView - 1, 1));
             }
@@ -165,7 +167,7 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void playerJoinTPTask(org.bukkit.event.player.PlayerJoinEvent event) {
         if (Settings.IMP.SPAWN_TELEPORT) {
-            Player player = event.getPlayer();
+            org.bukkit.entity.Player player = event.getPlayer();
             Location def = Bukkit.getWorlds().get(0).getSpawnLocation();
             PlayerRespawnEvent spawn = new PlayerRespawnEvent(player, def, false);
             Bukkit.getServer().getPluginManager().callEvent(spawn);
@@ -176,17 +178,17 @@ public class RedEditBukkit extends JavaPlugin implements IRedEditPlugin, Listene
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
-        Player player = event.getPlayer();
+        org.bukkit.entity.Player player = event.getPlayer();
         setViewDistance(player, 1);
-        FawePlayer fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         playerJoin.call(fp);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerLeave(org.bukkit.event.player.PlayerQuitEvent event) {
-        Player player = event.getPlayer();
+        org.bukkit.entity.Player player = event.getPlayer();
         views.remove(player.getUniqueId());
-        FawePlayer fp = FawePlayer.wrap(player);
+        Player fp = Fawe.imp().wrap(player);
         playerQuit.call(fp);
     }
 }

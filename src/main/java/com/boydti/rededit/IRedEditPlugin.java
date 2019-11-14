@@ -1,13 +1,13 @@
 package com.boydti.rededit;
 
-import com.boydti.fawe.object.FawePlayer;
+import com.sk89q.worldedit.entity.Player;
 
 public interface IRedEditPlugin {
-    public void teleport(FawePlayer fp, String server);
+    void teleport(Player fp, String server);
 
-    public void teleportHere(FawePlayer desination, String otherPlayer);
+    void teleportHere(Player desination, String otherPlayer);
 
-    public void registerEvents();
+    void registerEvents();
 
-    public String getServerName();
+    String getServerName();
 }
